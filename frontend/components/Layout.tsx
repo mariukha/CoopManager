@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   LayoutDashboard, Users, Home, Building, Hammer,
   Wallet, FileText, Settings, Database, LogOut, Sun, Moon, Menu, X,
+  FileSignature, CreditCard, CalendarDays,
 } from 'lucide-react';
 import type { UserRole } from '../hooks/useAuth';
 
@@ -31,6 +32,9 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'naprawa', label: 'Naprawy', icon: Hammer, roles: ['admin', 'resident'] },
   { id: 'oplata', label: 'Opłaty', icon: Wallet, roles: ['admin', 'resident'] },
   { id: 'uslugi', label: 'Usługi', icon: Settings, roles: ['admin'] },
+  { id: 'umowa', label: 'Umowy', icon: FileSignature, roles: ['admin'] },
+  { id: 'konto_bankowe', label: 'Konta Bankowe', icon: CreditCard, roles: ['admin'] },
+  { id: 'spotkanie_mieszkancow', label: 'Spotkania', icon: CalendarDays, roles: ['admin'] },
   { id: 'reports', label: 'Raporty Systemowe', icon: FileText, roles: ['admin'] },
   { id: 'system', label: 'Procedury PL/SQL', icon: Database, roles: ['admin'] },
 ];

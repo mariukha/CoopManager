@@ -30,9 +30,10 @@ import {
   PAYMENT_STATUSES,
   REPAIR_STATUSES,
   MEASUREMENT_UNITS,
+  CONTRACT_TYPES,
 } from './config/constants';
 
-import type { SortConfig, DatabaseRecord, Budynek, Mieszkanie, Pracownik, Uslugi } from './types';
+import type { SortConfig, DatabaseRecord, Budynek, Mieszkanie, Pracownik, Uslugi, Czlonek } from './types';
 
 const App: React.FC = () => {
   const { isLoggedIn, userRole, userData, isLoading: authLoading, loginAdmin, loginResident, logout } = useAuth();
@@ -50,6 +51,7 @@ const App: React.FC = () => {
   const [employees, setEmployees] = useState<Pracownik[]>([]);
   const [apartments, setApartments] = useState<(Mieszkanie & { displayLabel: string })[]>([]);
   const [buildings, setBuildings] = useState<Budynek[]>([]);
+  const [members, setMembers] = useState<Czlonek[]>([]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<DatabaseRecord | null>(null);
@@ -96,16 +98,18 @@ const App: React.FC = () => {
     if (userRole !== 'admin') return;
     
     try {
-      const [srvData, empData, aptData, bldData] = await Promise.all([
+      const [srvData, empData, aptData, bldData, memData] = await Promise.all([
         db.getTableData<Uslugi>('uslugi'),
         db.getTableData<Pracownik>('pracownik'),
         db.getTableData<Mieszkanie>('mieszkanie'),
         db.getTableData<Budynek>('budynek'),
+        db.getTableData<Czlonek>('czlonek'),
       ]);
 
       setServices(srvData || []);
       setEmployees(empData || []);
       setBuildings(bldData || []);
+      setMembers(memData || []);
       setApartments(
         (aptData || []).map(apt => ({
           ...apt,
@@ -113,7 +117,7 @@ const App: React.FC = () => {
         }))
       );
     } catch {
-      console.error('Błąd synchronizacji dropdownów');
+      console.error('Blad synchronizacji dropdownow');
     }
   }, [userRole]);
 
@@ -263,11 +267,23 @@ const App: React.FC = () => {
       if (editingItem && idField) {
         await db.updateRecord(currentView, idField, editingItem[idField] as string | number, formData);
       } else {
-        await db.insertRecord(currentView, formData);
+        // Dla oplata używamy funkcji dodaj_oplate_fn (Lab 11/12)
+        if (currentView === 'oplata' && formData.id_mieszkania && formData.id_uslugi && formData.zuzycie) {
+          const result = await db.callProcedureAddFee(
+            Number(formData.id_mieszkania),
+            Number(formData.id_uslugi),
+            Number(formData.zuzycie)
+          );
+          showNotification(`Lab 11 - dodaj_oplate_fn: ${result}`, 'success');
+        } else {
+          await db.insertRecord(currentView, formData);
+        }
       }
 
       setIsModalOpen(false);
-      showNotification('Pomyślnie zapisano.');
+      if (currentView !== 'oplata' || editingItem) {
+        showNotification('Pomyślnie zapisano.');
+      }
       await new Promise(resolve => setTimeout(resolve, 150));
       await loadData();
     } catch {
@@ -337,6 +353,9 @@ const App: React.FC = () => {
                   {field === 'id_uslugi' && services.map(s => (
                     <option key={s.id_uslugi} value={s.id_uslugi}>{s.nazwa_uslugi}</option>
                   ))}
+                  {field === 'id_czlonka' && members.map(m => (
+                    <option key={m.id_czlonka} value={m.id_czlonka}>{m.imie} {m.nazwisko}</option>
+                  ))}
                   {field === 'status' && REPAIR_STATUSES.map(s => (
                     <option key={s} value={s}>{s}</option>
                   ))}
@@ -345,6 +364,9 @@ const App: React.FC = () => {
                   ))}
                   {field === 'jednostka_miary' && MEASUREMENT_UNITS.map(u => (
                     <option key={u} value={u}>{u}</option>
+                  ))}
+                  {field === 'typ_umowy' && CONTRACT_TYPES.map(t => (
+                    <option key={t} value={t}>{t}</option>
                   ))}
                 </select>
               ) : (

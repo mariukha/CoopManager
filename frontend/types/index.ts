@@ -9,9 +9,8 @@ export interface Budynek {
 export interface Mieszkanie {
   id_mieszkania: number;
   numer: string;
-  powierzchnia: number;
+  metraz: number;
   liczba_pokoi: number;
-  pietro: number;
   id_budynku: number;
   displayLabel?: string;
 }
@@ -20,7 +19,9 @@ export interface Czlonek {
   id_czlonka: number;
   imie: string;
   nazwisko: string;
-  numer_telefonu: string;
+  telefon: string;
+  email: string;
+  pesel: string;
   id_mieszkania: number;
 }
 
@@ -30,12 +31,13 @@ export interface Pracownik {
   nazwisko: string;
   stanowisko: string;
   telefon: string;
+  email: string;
 }
 
 export interface Naprawa {
   id_naprawy: number;
   opis: string;
-  status: 'Zgłoszona' | 'W toku' | 'Wykonana' | 'Anulowana';
+  status: string;
   data_zgloszenia: string;
   id_mieszkania: number;
   id_pracownika?: number;
@@ -54,16 +56,40 @@ export interface Oplata {
   id_uslugi: number;
   zuzycie: number;
   kwota: number;
-  data_platnosci: string;
-  status_oplaty: 'Wystawiono' | 'Zapłacono' | 'Oczekuje' | 'Zaległość';
+  data_naliczenia: string;
+  status_oplaty: string;
+}
+
+export interface Umowa {
+  id_umowy: number;
+  id_mieszkania: number;
+  id_czlonka: number;
+  data_zawarcia: string;
+  data_wygasniecia: string;
+  typ_umowy: string;
+}
+
+export interface KontoBankowe {
+  id_konta: number;
+  id_czlonka: number;
+  numer_konta: string;
+  saldo: number;
+}
+
+export interface SpotkanieMieszkancow {
+  id_spotkania: number;
+  temat: string;
+  miejsce: string;
+  data_spotkania: string;
 }
 
 export interface LogAudit {
   id_logu: number;
   id_czlonka: number;
   operacja: 'INSERT' | 'UPDATE' | 'DELETE';
-  data_operacji: string;
-  uzytkownik: string;
+  stare_dane: string;
+  nowe_dane: string;
+  data_zmiany: string;
 }
 
 export interface ColumnDefinition {
@@ -92,12 +118,31 @@ export interface UnpaidDetail {
   data_platnosci: string;
 }
 
+export interface ApartmentSummary {
+  id_mieszkania: number;
+  numer: string;
+  liczba_oplat: number;
+  suma_oplat: number;
+  zaleglosci: number;
+}
+
+export interface RepairStatus {
+  id_naprawy: number;
+  opis: string;
+  status: string;
+  opis_statusu: string;
+  pracownik: string;
+}
+
 export interface SummaryReport {
   total_revenue: number;
   members_count: number;
   arrears_count: number;
   services_summary: ServiceSummary[];
   unpaid_details: UnpaidDetail[];
+  table_stats?: Record<string, number>;
+  apartments_summary?: ApartmentSummary[];
+  repairs_status?: RepairStatus[];
 }
 
 export type DatabaseRecord = Record<string, unknown>;

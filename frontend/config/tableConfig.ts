@@ -11,16 +11,16 @@ export const TABLE_COLUMNS: Record<string, ColumnDefinition[]> = {
   mieszkanie: [
     { key: 'id_mieszkania', label: 'ID' },
     { key: 'numer', label: 'Nr', priority: true },
-    { key: 'powierzchnia', label: 'Metraż', priority: true },
+    { key: 'metraz', label: 'Metraż m²', priority: true },
     { key: 'liczba_pokoi', label: 'Pokoje' },
-    { key: 'pietro', label: 'Piętro' },
     { key: 'id_budynku', label: 'Budynek ID' },
   ],
   czlonek: [
     { key: 'id_czlonka', label: 'ID' },
     { key: 'imie', label: 'Imię' },
     { key: 'nazwisko', label: 'Nazwisko', priority: true },
-    { key: 'numer_telefonu', label: 'Telefon', priority: true },
+    { key: 'telefon', label: 'Telefon', priority: true },
+    { key: 'email', label: 'Email' },
     { key: 'id_mieszkania', label: 'Mieszkanie ID' },
   ],
   pracownik: [
@@ -47,19 +47,42 @@ export const TABLE_COLUMNS: Record<string, ColumnDefinition[]> = {
     { key: 'id_oplaty', label: 'ID' },
     { key: 'zuzycie', label: 'Zużycie' },
     { key: 'kwota', label: 'Suma (PLN)', priority: true },
-    { key: 'data_platnosci', label: 'Termin' },
+    { key: 'data_naliczenia', label: 'Data' },
     { key: 'status_oplaty', label: 'Status', priority: true },
+  ],
+  umowa: [
+    { key: 'id_umowy', label: 'ID' },
+    { key: 'id_mieszkania', label: 'Mieszkanie' },
+    { key: 'id_czlonka', label: 'Członek' },
+    { key: 'data_zawarcia', label: 'Od', priority: true },
+    { key: 'data_wygasniecia', label: 'Do', priority: true },
+    { key: 'typ_umowy', label: 'Typ', priority: true },
+  ],
+  konto_bankowe: [
+    { key: 'id_konta', label: 'ID' },
+    { key: 'id_czlonka', label: 'Członek' },
+    { key: 'numer_konta', label: 'Nr konta', priority: true },
+    { key: 'saldo', label: 'Saldo (PLN)', priority: true },
+  ],
+  spotkanie_mieszkancow: [
+    { key: 'id_spotkania', label: 'ID' },
+    { key: 'temat', label: 'Temat', priority: true },
+    { key: 'miejsce', label: 'Miejsce', priority: true },
+    { key: 'data_spotkania', label: 'Data' },
   ],
 };
 
 export const FORM_FIELDS: Record<string, string[]> = {
   budynek: ['adres', 'liczba_pieter', 'liczba_mieszkan', 'rok_budowy'],
-  mieszkanie: ['numer', 'powierzchnia', 'liczba_pokoi', 'pietro', 'id_budynku'],
-  czlonek: ['imie', 'nazwisko', 'numer_telefonu', 'id_mieszkania'],
-  pracownik: ['imie', 'nazwisko', 'stanowisko', 'telefon'],
+  mieszkanie: ['numer', 'metraz', 'liczba_pokoi', 'id_budynku'],
+  czlonek: ['imie', 'nazwisko', 'telefon', 'email', 'pesel', 'id_mieszkania'],
+  pracownik: ['imie', 'nazwisko', 'stanowisko', 'telefon', 'email'],
   naprawa: ['opis', 'status', 'data_zgloszenia', 'id_mieszkania', 'id_pracownika'],
   uslugi: ['nazwa_uslugi', 'jednostka_miary', 'cena_za_jednostke'],
-  oplata: ['id_mieszkania', 'id_uslugi', 'zuzycie', 'kwota', 'data_platnosci', 'status_oplaty'],
+  oplata: ['id_mieszkania', 'id_uslugi', 'zuzycie', 'kwota', 'status_oplaty'],
+  umowa: ['id_mieszkania', 'id_czlonka', 'data_zawarcia', 'data_wygasniecia', 'typ_umowy'],
+  konto_bankowe: ['id_czlonka', 'numer_konta', 'saldo'],
+  spotkanie_mieszkancow: ['temat', 'miejsce', 'data_spotkania'],
 };
 
 export const DROPDOWN_FIELDS = [
@@ -67,22 +90,23 @@ export const DROPDOWN_FIELDS = [
   'id_mieszkania',
   'id_pracownika',
   'id_uslugi',
+  'id_czlonka',
   'status',
   'status_oplaty',
   'jednostka_miary',
+  'typ_umowy',
 ] as const;
 
 export const NUMERIC_FIELDS = [
   'kwota',
   'zuzycie',
-  'powierzchnia',
-  'numer',
+  'metraz',
   'liczba_pieter',
   'liczba_mieszkan',
   'rok_budowy',
-  'pietro',
   'liczba_pokoi',
   'cena_za_jednostke',
+  'saldo',
 ] as const;
 
 export function getPrimaryKeyField(record: Record<string, unknown>): string | undefined {

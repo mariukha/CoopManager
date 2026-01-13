@@ -14,8 +14,10 @@ export const USER_ROLES = {
   RESIDENT: 'resident',
 } as const;
 
-export const PAYMENT_STATUSES = ['Wystawiono', 'Zaplacono', 'Oczekuje', 'Zaleglosc'] as const;
+export const PAYMENT_STATUSES = ['nieoplacone', 'oplacone', 'zaleglosc'] as const;
 
-export const REPAIR_STATUSES = ['Zgloszona', 'W toku', 'Wykonana', 'Anulowana'] as const;
+export const REPAIR_STATUSES = ['zgloszona', 'w trakcie', 'wykonana', 'anulowana'] as const;
 
-export const MEASUREMENT_UNITS = ['m3', 'kWh', 'osoba', 'm2', 'ryczałt'] as const;
+export const MEASUREMENT_UNITS = ['m3', 'kWh', 'osoba', 'm2', 'szt'] as const;
+
+export const CONTRACT_TYPES = ['najem', 'wlasnosc', 'uzytkowanie'] as const;

@@ -1,0 +1,94 @@
+SET SERVEROUTPUT ON
+--zad1
+SPOOL wyniki_lab12.txt
+
+--zad2_1 (Kursor jawny dla tabeli CZLONEK)
+BEGIN
+    FOR rec IN (SELECT imie, nazwisko FROM czlonek) LOOP
+        DBMS_OUTPUT.PUT_LINE('Mieszkaniec: ' || rec.imie || ' ' || rec.nazwisko);
+    END LOOP;
+END;
+/
+
+--zad2_2 (Kursor jawny dla tabeli BUDYNEK)
+BEGIN
+    FOR rec IN (SELECT adres FROM budynek) LOOP
+        DBMS_OUTPUT.PUT_LINE('Adres budynku: ' || rec.adres);
+    END LOOP;
+END;
+/
+
+--zad3_1 (Wyjątek DUP_VAL_ON_INDEX - klucz główny)
+BEGIN
+    -- Próba wstawienia członka z istniejącym ID = 1
+    INSERT INTO czlonek (id_czlonka, imie, nazwisko, id_mieszkania) 
+    VALUES (1, 'Test', 'Testowy', 407);
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        DBMS_OUTPUT.PUT_LINE('Błąd: Członek o tym ID już istnieje w bazie.');
+END;
+/
+
+--zad3_2 (Wyjątek NO_DATA_FOUND)
+DECLARE
+    v_nazwisko czlonek.nazwisko%TYPE;
+BEGIN
+    -- Szukanie ID, którego nie ma
+    SELECT nazwisko INTO v_nazwisko FROM czlonek WHERE id_czlonka = 9999;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Błąd: Nie znaleziono członka o podanym identyfikatorze.');
+END;
+/
+
+--zad4 (Tworzenie pakietu do zarządzania spółdzielnią)
+CREATE OR REPLACE PACKAGE coop_pkg IS
+    -- Procedura zwiększająca kwotę opłat o 10%
+    PROCEDURE zwieksz_oplaty;
+    -- Funkcja pobierająca nazwisko z obsługą błędu (do zadania 5)
+    FUNCTION pobierz_nazwisko(p_id NUMBER) RETURN VARCHAR2;
+END coop_pkg;
+/
+
+CREATE OR REPLACE PACKAGE BODY coop_pkg IS
+    PROCEDURE zwieksz_oplaty IS
+    BEGIN
+        UPDATE oplata SET kwota = kwota * 1.1;
+        DBMS_OUTPUT.PUT_LINE('Zaktualizowano kwoty opłat o 10% (wierszy: ' || SQL%ROWCOUNT || ')');
+        COMMIT;
+    END zwieksz_oplaty;
+
+    FUNCTION pobierz_nazwisko(p_id NUMBER) RETURN VARCHAR2 IS
+        v_name czlonek.nazwisko%TYPE;
+    BEGIN
+        SELECT nazwisko INTO v_name FROM czlonek WHERE id_czlonka = p_id;
+        RETURN v_name;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            RETURN 'Brak danych';
+    END pobierz_nazwisko;
+END coop_pkg;
+/
+
+-- Test zadania 4
+BEGIN
+    coop_pkg.zwieksz_oplaty;
+END;
+/
+
+--zad5 (Testowanie funkcji z pakietu dla różnych danych)
+DECLARE
+    v_res VARCHAR2(50);
+BEGIN
+    -- Test 1: Istniejący członek
+    v_res := coop_pkg.pobierz_nazwisko(1);
+    DBMS_OUTPUT.PUT_LINE('Wynik 1 (ID 1): ' || v_res);
+    
+    -- Test 2: Nieistniejący członek (zadziała obsługa wyjątku wewnątrz pakietu)
+    v_res := coop_pkg.pobierz_nazwisko(555);
+    DBMS_OUTPUT.PUT_LINE('Wynik 2 (ID 555): ' || v_res);
+END;
+/
+
+--zad6
+SPOOL OFF
