@@ -190,7 +190,7 @@ export const Dashboard: React.FC = () => {
 
       {/* Members Modal */}
       {isMembersModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4" onClick={() => setIsMembersModalOpen(false)}>
+        <div className="fixed top-0 left-0 right-0 bottom-0 w-full h-full bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4" onClick={() => setIsMembersModalOpen(false)}>
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-700" onClick={e => e.stopPropagation()}>
             <div className="p-5 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
               <div>

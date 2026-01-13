@@ -116,8 +116,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 onChange={e => setResCreds(prev => ({ ...prev, nazwisko: e.target.value }))}
               />
               <input
-                type="number"
-                placeholder="Numer mieszkania"
+                type="text"
+                placeholder="Numer mieszkania (np. 1A, 2B)"
                 required
                 className={inputClassName}
                 value={resCreds.numer}
