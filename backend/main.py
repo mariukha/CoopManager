@@ -520,6 +520,263 @@ async def get_resident_data(apt_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
 
+# ============================================
+# WIDOKI Z ROZNYMI JOIN (Lab 10)
+# ============================================
+
+# RIGHT JOIN - pracownicy z naprawami (Lab 10)
+@app.get("/views/pracownicy-naprawy")
+async def get_pracownicy_naprawy():
+    try:
+        with get_cursor() as (cursor, conn):
+            cursor.execute("SELECT * FROM v_pracownicy_naprawy")
+            columns = [col[0].lower() for col in cursor.description]
+            rows = cursor.fetchall()
+            return [serialize_row(row, columns) for row in rows]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
+
+# FULL OUTER JOIN - oplaty z uslugami (Lab 10)
+@app.get("/views/oplaty-uslugi-full")
+async def get_oplaty_uslugi_full():
+    try:
+        with get_cursor() as (cursor, conn):
+            cursor.execute("SELECT * FROM v_oplaty_uslugi_full")
+            columns = [col[0].lower() for col in cursor.description]
+            rows = cursor.fetchall()
+            return [serialize_row(row, columns) for row in rows]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
+
+# CROSS JOIN - budynki z uslugami (Lab 10)
+@app.get("/views/budynki-uslugi-cross")
+async def get_budynki_uslugi_cross():
+    try:
+        with get_cursor() as (cursor, conn):
+            cursor.execute("SELECT * FROM v_budynki_uslugi_cross")
+            columns = [col[0].lower() for col in cursor.description]
+            rows = cursor.fetchall()
+            return [serialize_row(row, columns) for row in rows]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
+
+# SELF JOIN - pracownicy koledzy (Lab 10)
+@app.get("/views/pracownicy-koledzy")
+async def get_pracownicy_koledzy():
+    try:
+        with get_cursor() as (cursor, conn):
+            cursor.execute("SELECT * FROM v_pracownicy_koledzy")
+            columns = [col[0].lower() for col in cursor.description]
+            rows = cursor.fetchall()
+            return [serialize_row(row, columns) for row in rows]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
+
+# JOIN 3 tabel - czlonkowie pelne info (Lab 10)
+@app.get("/views/czlonkowie-pelne-info")
+async def get_czlonkowie_pelne_info():
+    try:
+        with get_cursor() as (cursor, conn):
+            cursor.execute("SELECT * FROM v_czlonkowie_pelne_info")
+            columns = [col[0].lower() for col in cursor.description]
+            rows = cursor.fetchall()
+            return [serialize_row(row, columns) for row in rows]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
+
+# ============================================
+# PROCEDURY CRUD (Lab 11)
+# ============================================
+
+class CzlonekCreate(BaseModel):
+    id_mieszkania: int
+    imie: str
+    nazwisko: str
+    pesel: Optional[str] = None
+    telefon: Optional[str] = None
+    email: Optional[str] = None
+
+class CzlonekUpdate(BaseModel):
+    imie: Optional[str] = None
+    nazwisko: Optional[str] = None
+    telefon: Optional[str] = None
+    email: Optional[str] = None
+
+# INSERT przez procedurę (Lab 11)
+@app.post("/procedures/dodaj-czlonka")
+async def proc_dodaj_czlonka(data: CzlonekCreate):
+    try:
+        with get_cursor() as (cursor, conn):
+            out_id = cursor.var(int)
+            cursor.execute("""
+                BEGIN
+                    dodaj_czlonka(:1, :2, :3, :4, :5, :6, :7);
+                END;
+            """, [data.id_mieszkania, data.imie, data.nazwisko, 
+                  data.pesel, data.telefon, data.email, out_id])
+            conn.commit()
+            return {"success": True, "id_czlonka": out_id.getvalue(), "message": "Członek dodany przez procedurę DB"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
+
+# UPDATE przez procedurę (Lab 11)
+@app.put("/procedures/aktualizuj-czlonka/{id_czlonka}")
+async def proc_aktualizuj_czlonka(id_czlonka: int, data: CzlonekUpdate):
+    try:
+        with get_cursor() as (cursor, conn):
+            out_rows = cursor.var(int)
+            cursor.execute("""
+                BEGIN
+                    aktualizuj_czlonka(:1, :2, :3, :4, :5, :6);
+                END;
+            """, [id_czlonka, data.imie, data.nazwisko, data.telefon, data.email, out_rows])
+            conn.commit()
+            return {"success": True, "rows_updated": out_rows.getvalue(), "message": "Członek zaktualizowany przez procedurę DB"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
+
+# DELETE przez procedurę (Lab 11)
+@app.delete("/procedures/usun-czlonka/{id_czlonka}")
+async def proc_usun_czlonka(id_czlonka: int):
+    try:
+        with get_cursor() as (cursor, conn):
+            out_rows = cursor.var(int)
+            cursor.execute("""
+                BEGIN
+                    usun_czlonka(:1, :2);
+                END;
+            """, [id_czlonka, out_rows])
+            conn.commit()
+            return {"success": True, "rows_deleted": out_rows.getvalue(), "message": "Członek usunięty przez procedurę DB"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
+
+# Funkcja dodaj_spotkanie z SEQUENCE (Lab 11)
+class SpotkanieCreate(BaseModel):
+    temat: str
+    miejsce: str
+    data: Optional[str] = None
+
+@app.post("/functions/dodaj-spotkanie")
+async def func_dodaj_spotkanie(data: SpotkanieCreate):
+    try:
+        with get_cursor() as (cursor, conn):
+            from datetime import datetime
+            data_spotkania = datetime.strptime(data.data, '%Y-%m-%d') if data.data else None
+            out_id = cursor.var(int)
+            cursor.execute("""
+                BEGIN
+                    :1 := dodaj_spotkanie(:2, :3, :4);
+                END;
+            """, [out_id, data.temat, data.miejsce, data_spotkania])
+            conn.commit()
+            return {"success": True, "id_spotkania": out_id.getvalue(), "message": "Spotkanie dodane z użyciem SEQUENCE"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
+
+# Funkcja aktualizuj_saldo_konta (Lab 11)
+@app.put("/functions/aktualizuj-saldo/{id_konta}")
+async def func_aktualizuj_saldo(id_konta: int, nowe_saldo: float):
+    try:
+        with get_cursor() as (cursor, conn):
+            out_rows = cursor.var(int)
+            cursor.execute("""
+                BEGIN
+                    :1 := aktualizuj_saldo_konta(:2, :3);
+                END;
+            """, [out_rows, id_konta, nowe_saldo])
+            conn.commit()
+            return {"success": True, "rows_updated": out_rows.getvalue(), "message": f"Saldo konta {id_konta} zaktualizowane"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
+
+# ============================================
+# PACKAGE coop_crud_pkg (Lab 12)
+# ============================================
+
+class BudynekCreate(BaseModel):
+    adres: str
+    liczba_pieter: int
+    rok_budowy: int
+
+# INSERT budynek przez package (Lab 12)
+@app.post("/package/insert-budynek")
+async def pkg_insert_budynek(data: BudynekCreate):
+    try:
+        with get_cursor() as (cursor, conn):
+            out_id = cursor.var(int)
+            cursor.execute("""
+                BEGIN
+                    coop_crud_pkg.insert_budynek(:1, :2, :3, :4);
+                END;
+            """, [data.adres, data.liczba_pieter, data.rok_budowy, out_id])
+            conn.commit()
+            return {"success": True, "id_budynku": out_id.getvalue(), "message": "Budynek dodany przez package"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
+
+# UPDATE budynek przez package (Lab 12)
+@app.put("/package/update-budynek/{id_budynku}")
+async def pkg_update_budynek(id_budynku: int, adres: str, liczba_pieter: int):
+    try:
+        with get_cursor() as (cursor, conn):
+            cursor.execute("""
+                BEGIN
+                    coop_crud_pkg.update_budynek(:1, :2, :3);
+                END;
+            """, [id_budynku, adres, liczba_pieter])
+            conn.commit()
+            return {"success": True, "message": f"Budynek {id_budynku} zaktualizowany przez package"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
+
+# DELETE budynek przez package (Lab 12)
+@app.delete("/package/delete-budynek/{id_budynku}")
+async def pkg_delete_budynek(id_budynku: int):
+    try:
+        with get_cursor() as (cursor, conn):
+            out_deleted = cursor.var(int)
+            cursor.execute("""
+                BEGIN
+                    coop_crud_pkg.delete_budynek(:1, :2);
+                END;
+            """, [id_budynku, out_deleted])
+            conn.commit()
+            return {"success": True, "rows_deleted": out_deleted.getvalue(), "message": "Budynek usunięty przez package"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
+
+# Funkcja pobierz_nazwisko_czlonka z obsługą wyjątków (Lab 12)
+@app.get("/package/nazwisko-czlonka/{id_czlonka}")
+async def pkg_nazwisko_czlonka(id_czlonka: int):
+    try:
+        with get_cursor() as (cursor, conn):
+            result = cursor.callfunc("coop_crud_pkg.pobierz_nazwisko_czlonka", str, [id_czlonka])
+            return {"id_czlonka": id_czlonka, "nazwisko": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
+
+# Funkcja pobierz_adres_budynku z obsługą wyjątków (Lab 12)
+@app.get("/package/adres-budynku/{id_budynku}")
+async def pkg_adres_budynku(id_budynku: int):
+    try:
+        with get_cursor() as (cursor, conn):
+            result = cursor.callfunc("coop_crud_pkg.pobierz_adres_budynku", str, [id_budynku])
+            return {"id_budynku": id_budynku, "adres": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
+
+# Funkcja statystyki_budynku (Lab 12)
+@app.get("/package/statystyki-budynku/{id_budynku}")
+async def pkg_statystyki_budynku(id_budynku: int):
+    try:
+        with get_cursor() as (cursor, conn):
+            result = cursor.callfunc("coop_crud_pkg.statystyki_budynku", str, [id_budynku])
+            return {"id_budynku": id_budynku, "statystyki": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+

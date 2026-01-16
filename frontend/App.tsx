@@ -11,6 +11,7 @@ import { LoginForm } from './components/LoginForm';
 import { Dashboard } from './pages/Dashboard';
 import { Procedures } from './pages/Procedures';
 import { Reports } from './pages/Reports';
+import { JoinViews } from './pages/JoinViews';
 
 import { useAuth } from './hooks/useAuth';
 import { useTheme } from './hooks/useTheme';
@@ -76,7 +77,7 @@ const App: React.FC = () => {
     setIsLoading(true);
     try {
       let data: DatabaseRecord[];
-      
+
       if (userRole === 'admin') {
         data = await db.getTableData(`${currentView}?t=${Date.now()}`);
       } else {
@@ -85,7 +86,7 @@ const App: React.FC = () => {
         );
         data = currentView === 'oplata' ? response.data.oplaty : response.data.naprawy;
       }
-      
+
       setTableData(data || []);
     } catch {
       showNotification('Błąd ładowania danych.', 'error');
@@ -96,7 +97,7 @@ const App: React.FC = () => {
 
   const loadDropdownData = useCallback(async () => {
     if (userRole !== 'admin') return;
-    
+
     try {
       const [srvData, empData, aptData, bldData, memData] = await Promise.all([
         db.getTableData<Uslugi>('uslugi'),
@@ -141,15 +142,15 @@ const App: React.FC = () => {
       result.sort((a, b) => {
         const aVal = a[sortConfig.key];
         const bVal = b[sortConfig.key];
-        
+
         if (aVal === bVal) return 0;
-        
+
         const multiplier = sortConfig.direction === 'asc' ? 1 : -1;
-        
+
         if (typeof aVal === 'number' && typeof bVal === 'number') {
           return (aVal - bVal) * multiplier;
         }
-        
+
         return String(aVal).localeCompare(String(bVal)) * multiplier;
       });
     }
@@ -173,7 +174,7 @@ const App: React.FC = () => {
 
   const handleSelectAll = () => {
     if (userRole !== 'admin') return;
-    
+
     if (selectedIds.length === processedData.length && processedData.length > 0) {
       setSelectedIds([]);
     } else {
@@ -247,7 +248,7 @@ const App: React.FC = () => {
         const serviceId = key === 'id_uslugi' ? value : prev.id_uslugi;
         const consumption = parseFloat(key === 'zuzycie' ? value : String(prev.zuzycie || 0));
         const service = services.find(s => s.id_uslugi === Number(serviceId));
-        
+
         if (service && !isNaN(consumption)) {
           newData.kwota = (service.cena_za_jednostke * consumption).toFixed(2);
         }
@@ -263,7 +264,7 @@ const App: React.FC = () => {
 
     try {
       const idField = editingItem ? getPrimaryKeyField(editingItem) : null;
-      
+
       if (editingItem && idField) {
         await db.updateRecord(currentView, idField, editingItem[idField] as string | number, formData);
       } else {
@@ -314,7 +315,7 @@ const App: React.FC = () => {
   };
 
   const renderFormInputs = () => {
-    const fields = FORM_FIELDS[currentView] || 
+    const fields = FORM_FIELDS[currentView] ||
       (tableData.length > 0 ? Object.keys(tableData[0]).filter(k => !k.startsWith('id_')) : []);
 
     return (
@@ -332,7 +333,7 @@ const App: React.FC = () => {
               <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">
                 {field.replace(/_/g, ' ')}
               </label>
-              
+
               {isDropdown ? (
                 <select
                   className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl p-4 text-sm font-bold outline-none focus:border-blue-600 dark:text-white"
@@ -398,7 +399,7 @@ const App: React.FC = () => {
     const columns = TABLE_COLUMNS[currentView] || [];
     const pageTitle = userRole === 'resident'
       ? `Moje ${currentView === 'oplata' ? 'Opłaty' : 'Naprawy'}`
-      : currentView;
+      : currentView.replace(/_/g, ' ');
 
     return (
       <div className="animate-in fade-in duration-500">
@@ -449,8 +450,8 @@ const App: React.FC = () => {
           onEdit={userRole === 'admin' ? handleEdit : undefined}
           onDelete={userRole === 'admin' ? handleDelete : undefined}
           selectedIds={userRole === 'admin' ? selectedIds : []}
-          onSelectRow={userRole === 'admin' ? handleSelectRow : () => {}}
-          onSelectAll={userRole === 'admin' ? handleSelectAll : () => {}}
+          onSelectRow={userRole === 'admin' ? handleSelectRow : () => { }}
+          onSelectAll={userRole === 'admin' ? handleSelectAll : () => { }}
           sortConfig={sortConfig}
           onSort={handleSort}
         />

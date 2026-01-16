@@ -37,7 +37,7 @@ export const Dashboard: React.FC = () => {
     try {
       const tables = ['budynek', 'mieszkanie', 'czlonek', 'pracownik', 'naprawa', 'oplata', 'umowa', 'uslugi'];
       const tableStats: Record<string, number> = {};
-      
+
       for (const table of tables) {
         try {
           const result = await db.countRecords(table);
@@ -71,7 +71,7 @@ export const Dashboard: React.FC = () => {
     setIsMembersModalOpen(true);
     setLoadingMembers(true);
     setBuildingMembers('');
-    
+
     try {
       const result = await db.getMembersOfBuilding(buildingId);
       setBuildingMembers(result.members || 'Brak członków');
@@ -102,7 +102,7 @@ export const Dashboard: React.FC = () => {
             Statystyki bazy danych
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Lab 13 — funkcja policz_rekordy
+            Przegląd statystyk spółdzielni
           </p>
         </div>
       </div>
@@ -112,7 +112,7 @@ export const Dashboard: React.FC = () => {
         {Object.entries(stats.tableStats).map(([table, count]) => {
           const info = TABLE_INFO[table];
           return (
-            <div 
+            <div
               key={table}
               className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700"
             >
@@ -158,7 +158,7 @@ export const Dashboard: React.FC = () => {
               Budynki
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Lab 11 — funkcja pobierz_czlonkow_budynku (CURSOR)
+              Kliknij budynek by zobaczyć listę mieszkańców
             </p>
           </div>
         </div>
@@ -189,7 +189,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Members Modal - using Portal to render above everything */}
+      {/* Members Modal */}
       {isMembersModalOpen && createPortal(
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4" onClick={() => setIsMembersModalOpen(false)}>
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-700" onClick={e => e.stopPropagation()}>
@@ -209,7 +209,7 @@ export const Dashboard: React.FC = () => {
                 <X size={18} className="text-slate-400" />
               </button>
             </div>
-            
+
             <div className="p-5 max-h-80 overflow-y-auto">
               {loadingMembers ? (
                 <div className="flex items-center justify-center py-8">
@@ -217,8 +217,8 @@ export const Dashboard: React.FC = () => {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {buildingMembers.split(', ').map((member, idx) => (
-                    <div 
+                  {buildingMembers.split('; ').filter(m => m.trim()).map((member, idx) => (
+                    <div
                       key={idx}
                       className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg"
                     >
@@ -233,7 +233,7 @@ export const Dashboard: React.FC = () => {
                 </div>
               )}
             </div>
-            
+
             <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
               <button
                 onClick={() => setIsMembersModalOpen(false)}

@@ -2,15 +2,17 @@ import React, { useState } from 'react';
 import {
   LayoutDashboard, Users, Home, Building, Hammer,
   Wallet, FileText, Settings, Database, LogOut, Sun, Moon, Menu, X,
-  FileSignature, CreditCard, CalendarDays,
+  FileSignature, CreditCard, CalendarDays, ChevronDown, ChevronRight,
+  Wrench, BarChart3, UserCog,
 } from 'lucide-react';
 import type { UserRole } from '../hooks/useAuth';
 
 interface NavItem {
   id: string;
   label: string;
-  icon: React.ComponentType<{ size?: number }>;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
   roles: string[];
+  children?: NavItem[];
 }
 
 interface LayoutProps {
@@ -24,19 +26,51 @@ interface LayoutProps {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { id: 'dashboard', label: 'Pulpit Główny', icon: LayoutDashboard, roles: ['admin'] },
-  { id: 'budynek', label: 'Budynki', icon: Building, roles: ['admin'] },
-  { id: 'mieszkanie', label: 'Mieszkania', icon: Home, roles: ['admin'] },
-  { id: 'czlonek', label: 'Członkowie', icon: Users, roles: ['admin'] },
-  { id: 'pracownik', label: 'Pracownicy', icon: Users, roles: ['admin'] },
-  { id: 'naprawa', label: 'Naprawy', icon: Hammer, roles: ['admin', 'resident'] },
-  { id: 'oplata', label: 'Opłaty', icon: Wallet, roles: ['admin', 'resident'] },
-  { id: 'uslugi', label: 'Usługi', icon: Settings, roles: ['admin'] },
-  { id: 'umowa', label: 'Umowy', icon: FileSignature, roles: ['admin'] },
-  { id: 'konto_bankowe', label: 'Konta Bankowe', icon: CreditCard, roles: ['admin'] },
+  { id: 'dashboard', label: 'Pulpit główny', icon: LayoutDashboard, roles: ['admin'] },
+  {
+    id: 'nieruchomosci',
+    label: 'Nieruchomości',
+    icon: Building,
+    roles: ['admin'],
+    children: [
+      { id: 'budynek', label: 'Budynki', icon: Building, roles: ['admin'] },
+      { id: 'mieszkanie', label: 'Mieszkania', icon: Home, roles: ['admin'] },
+    ]
+  },
+  {
+    id: 'mieszkancy',
+    label: 'Mieszkańcy',
+    icon: Users,
+    roles: ['admin'],
+    children: [
+      { id: 'czlonek', label: 'Członkowie', icon: Users, roles: ['admin'] },
+      { id: 'umowa', label: 'Umowy', icon: FileSignature, roles: ['admin'] },
+      { id: 'konto_bankowe', label: 'Konta bankowe', icon: CreditCard, roles: ['admin'] },
+    ]
+  },
+  {
+    id: 'finanse',
+    label: 'Finanse',
+    icon: Wallet,
+    roles: ['admin', 'resident'],
+    children: [
+      { id: 'oplata', label: 'Opłaty', icon: Wallet, roles: ['admin', 'resident'] },
+      { id: 'uslugi', label: 'Cennik usług', icon: Settings, roles: ['admin'] },
+    ]
+  },
+  {
+    id: 'serwis',
+    label: 'Serwis techniczny',
+    icon: Wrench,
+    roles: ['admin', 'resident'],
+    children: [
+      { id: 'naprawa', label: 'Zgłoszenia napraw', icon: Hammer, roles: ['admin', 'resident'] },
+      { id: 'pracownik', label: 'Pracownicy', icon: UserCog, roles: ['admin'] },
+    ]
+  },
   { id: 'spotkanie_mieszkancow', label: 'Spotkania', icon: CalendarDays, roles: ['admin'] },
-  { id: 'reports', label: 'Raporty Systemowe', icon: FileText, roles: ['admin'] },
-  { id: 'system', label: 'Procedury PL/SQL', icon: Database, roles: ['admin'] },
+  { id: 'reports', label: 'Podsumowania', icon: FileText, roles: ['admin'] },
+  { id: 'system', label: 'Narzędzia administratora', icon: Database, roles: ['admin'] },
 ];
 
 const VIEWS_WITH_TITLE = ['dashboard', 'reports', 'system'];
@@ -51,6 +85,15 @@ export const Layout: React.FC<LayoutProps> = ({
   userRole,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<string[]>(['finanse', 'serwis']);
+
+  const toggleGroup = (groupId: string) => {
+    setExpandedGroups(prev =>
+      prev.includes(groupId)
+        ? prev.filter(id => id !== groupId)
+        : [...prev, groupId]
+    );
+  };
 
   const filteredNavItems = NAV_ITEMS.filter(item => item.roles.includes(userRole || 'resident'));
 
@@ -59,12 +102,90 @@ export const Layout: React.FC<LayoutProps> = ({
     setIsMobileMenuOpen(false);
   };
 
+  const isItemActive = (item: NavItem): boolean => {
+    if (item.id === currentView) return true;
+    if (item.children) {
+      return item.children.some(child => child.id === currentView);
+    }
+    return false;
+  };
+
   const getNavLabel = (item: NavItem): string => {
     if (userRole === 'resident') {
-      if (item.id === 'oplata') return 'Moje Opłaty';
-      if (item.id === 'naprawa') return 'Moje Naprawy';
+      if (item.id === 'oplata' || item.id === 'finanse') return 'Moje Opłaty';
+      if (item.id === 'naprawa' || item.id === 'serwis') return 'Moje Naprawy';
     }
     return item.label;
+  };
+
+  const renderNavItem = (item: NavItem, depth = 0) => {
+    const Icon = item.icon;
+    const isActive = isItemActive(item);
+    const hasChildren = item.children && item.children.length > 0;
+    const isExpanded = expandedGroups.includes(item.id);
+    const filteredChildren = item.children?.filter(child => child.roles.includes(userRole || 'resident'));
+
+    if (hasChildren && filteredChildren && filteredChildren.length > 0) {
+      return (
+        <li key={item.id}>
+          <button
+            onClick={() => toggleGroup(item.id)}
+            className={`w-full flex items-center justify-between gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all
+              ${isActive
+                ? 'bg-blue-600/20 text-blue-400'
+                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+          >
+            <div className="flex items-center gap-3">
+              <Icon size={18} className={isActive ? 'text-blue-400' : ''} />
+              {getNavLabel(item)}
+            </div>
+            {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+          </button>
+          {isExpanded && (
+            <ul className="mt-1 ml-4 space-y-1 border-l border-slate-700 pl-3">
+              {filteredChildren.map(child => {
+                const ChildIcon = child.icon;
+                const isChildActive = currentView === child.id;
+                return (
+                  <li key={child.id}>
+                    <button
+                      onClick={() => handleNavigate(child.id)}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors
+                        ${isChildActive
+                          ? 'bg-blue-600 text-white shadow-md'
+                          : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                        }`}
+                      aria-current={isChildActive ? 'page' : undefined}
+                    >
+                      <ChildIcon size={16} />
+                      {child.label}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </li>
+      );
+    }
+
+    return (
+      <li key={item.id}>
+        <button
+          onClick={() => handleNavigate(item.id)}
+          className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors
+            ${isActive
+              ? 'bg-blue-600 text-white shadow-md'
+              : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+            }`}
+          aria-current={isActive ? 'page' : undefined}
+        >
+          <Icon size={18} />
+          {getNavLabel(item)}
+        </button>
+      </li>
+    );
   };
 
   return (
@@ -74,12 +195,17 @@ export const Layout: React.FC<LayoutProps> = ({
           transition-transform duration-300 ease-in-out md:relative md:translate-x-0
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
-        <div className="p-6 border-b border-slate-800 flex justify-between items-center">
+        <div className="p-5 border-b border-slate-800 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <Database className="text-blue-400" size={28} />
-            <h1 className="text-xs font-bold tracking-tight uppercase leading-tight text-slate-100">
-              System zarządzania<br />spółdzielnią mieszkaniową
-            </h1>
+            <div className="p-2 bg-blue-600 rounded-xl">
+              <Building className="text-white" size={22} />
+            </div>
+            <div>
+              <h1 className="text-sm font-bold tracking-tight text-white">
+                Spółdzielnia
+              </h1>
+              <p className="text-[10px] text-slate-400 uppercase tracking-wider">System zarządzania</p>
+            </div>
           </div>
           <button
             onClick={() => setIsMobileMenuOpen(false)}
@@ -90,29 +216,9 @@ export const Layout: React.FC<LayoutProps> = ({
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto py-4" aria-label="Główna nawigacja">
+        <nav className="flex-1 overflow-y-auto py-4 scrollbar-thin" aria-label="Główna nawigacja">
           <ul className="space-y-1 px-3">
-            {filteredNavItems.map(item => {
-              const Icon = item.icon;
-              const isActive = currentView === item.id;
-              
-              return (
-                <li key={item.id}>
-                  <button
-                    onClick={() => handleNavigate(item.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors
-                      ${isActive
-                        ? 'bg-blue-600 text-white shadow-md'
-                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                      }`}
-                    aria-current={isActive ? 'page' : undefined}
-                  >
-                    <Icon size={18} />
-                    {getNavLabel(item)}
-                  </button>
-                </li>
-              );
-            })}
+            {filteredNavItems.map(item => renderNavItem(item))}
           </ul>
         </nav>
 
@@ -148,8 +254,9 @@ export const Layout: React.FC<LayoutProps> = ({
             </button>
 
             {VIEWS_WITH_TITLE.includes(currentView) && (
-              <h2 className="text-lg md:text-xl font-semibold text-gray-800 dark:text-white uppercase tracking-wide truncate">
-                {NAV_ITEMS.find(n => n.id === currentView)?.label}
+              <h2 className="text-lg md:text-xl font-semibold text-gray-800 dark:text-white capitalize">
+                {NAV_ITEMS.find(n => n.id === currentView)?.label ||
+                  NAV_ITEMS.flatMap(n => n.children || []).find(c => c.id === currentView)?.label}
               </h2>
             )}
           </div>

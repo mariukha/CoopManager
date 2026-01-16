@@ -94,6 +94,120 @@ export const db = {
     return response.data;
   },
 
+  // ============================================
+  // WIDOKI Z ROZNYMI JOIN (Lab 10)
+  // ============================================
+
+  async getPracownicyNaprawy(): Promise<DatabaseRecord[]> {
+    const response = await axios.get(`${API_BASE_URL}/views/pracownicy-naprawy`);
+    return response.data;
+  },
+
+  async getOplatyUslugiFull(): Promise<DatabaseRecord[]> {
+    const response = await axios.get(`${API_BASE_URL}/views/oplaty-uslugi-full`);
+    return response.data;
+  },
+
+  async getBudynkiUslugiCross(): Promise<DatabaseRecord[]> {
+    const response = await axios.get(`${API_BASE_URL}/views/budynki-uslugi-cross`);
+    return response.data;
+  },
+
+  async getPracownicyKoledzy(): Promise<DatabaseRecord[]> {
+    const response = await axios.get(`${API_BASE_URL}/views/pracownicy-koledzy`);
+    return response.data;
+  },
+
+  async getCzlonkowiePelneInfo(): Promise<DatabaseRecord[]> {
+    const response = await axios.get(`${API_BASE_URL}/views/czlonkowie-pelne-info`);
+    return response.data;
+  },
+
+  // ============================================
+  // PROCEDURY CRUD (Lab 11)
+  // ============================================
+
+  async procDodajCzlonka(data: {
+    id_mieszkania: number;
+    imie: string;
+    nazwisko: string;
+    pesel?: string;
+    telefon?: string;
+    email?: string;
+  }): Promise<{ id_czlonka: number; message: string }> {
+    const response = await axios.post(`${API_BASE_URL}/procedures/dodaj-czlonka`, data);
+    return response.data;
+  },
+
+  async procAktualizujCzlonka(id: number, data: {
+    imie?: string;
+    nazwisko?: string;
+    telefon?: string;
+    email?: string;
+  }): Promise<{ rows_updated: number; message: string }> {
+    const response = await axios.put(`${API_BASE_URL}/procedures/aktualizuj-czlonka/${id}`, data);
+    return response.data;
+  },
+
+  async procUsunCzlonka(id: number): Promise<{ rows_deleted: number; message: string }> {
+    const response = await axios.delete(`${API_BASE_URL}/procedures/usun-czlonka/${id}`);
+    return response.data;
+  },
+
+  // Funkcja dodaj_spotkanie z SEQUENCE (Lab 11)
+  async funcDodajSpotkanie(data: {
+    temat: string;
+    miejsce: string;
+    data?: string;
+  }): Promise<{ id_spotkania: number; message: string }> {
+    const response = await axios.post(`${API_BASE_URL}/functions/dodaj-spotkanie`, data);
+    return response.data;
+  },
+
+  // Funkcja aktualizuj_saldo_konta (Lab 11)
+  async funcAktualizujSaldo(id_konta: number, nowe_saldo: number): Promise<{ rows_updated: number; message: string }> {
+    const response = await axios.put(`${API_BASE_URL}/functions/aktualizuj-saldo/${id_konta}?nowe_saldo=${nowe_saldo}`);
+    return response.data;
+  },
+
+  // ============================================
+  // PACKAGE coop_crud_pkg (Lab 12)
+  // ============================================
+
+  async pkgInsertBudynek(data: {
+    adres: string;
+    liczba_pieter: number;
+    rok_budowy: number;
+  }): Promise<{ id_budynku: number; message: string }> {
+    const response = await axios.post(`${API_BASE_URL}/package/insert-budynek`, data);
+    return response.data;
+  },
+
+  async pkgUpdateBudynek(id: number, adres: string, liczba_pieter: number): Promise<{ message: string }> {
+    const response = await axios.put(`${API_BASE_URL}/package/update-budynek/${id}?adres=${encodeURIComponent(adres)}&liczba_pieter=${liczba_pieter}`);
+    return response.data;
+  },
+
+  async pkgDeleteBudynek(id: number): Promise<{ rows_deleted: number; message: string }> {
+    const response = await axios.delete(`${API_BASE_URL}/package/delete-budynek/${id}`);
+    return response.data;
+  },
+
+  async pkgNazwiskoCzlonka(id: number): Promise<{ nazwisko: string }> {
+    const response = await axios.get(`${API_BASE_URL}/package/nazwisko-czlonka/${id}`);
+    return response.data;
+  },
+
+  async pkgAdresBudynku(id: number): Promise<{ adres: string }> {
+    const response = await axios.get(`${API_BASE_URL}/package/adres-budynku/${id}`);
+    return response.data;
+  },
+
+  async pkgStatystykiBudynku(id: number): Promise<{ statystyki: string }> {
+    const response = await axios.get(`${API_BASE_URL}/package/statystyki-budynku/${id}`);
+    return response.data;
+  },
+
   // Dane mieszkańca
   async getResidentData(aptId: number): Promise<{
     oplaty: DatabaseRecord[];
@@ -106,3 +220,4 @@ export const db = {
     return response.data;
   },
 };
+

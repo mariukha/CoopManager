@@ -282,6 +282,318 @@ FROM naprawa n
 LEFT JOIN pracownik p ON n.id_pracownika = p.id_pracownika;
 
 -- ============================================
+-- WIDOKI Z ROZNYMI JOIN (Lab 10)
+-- ============================================
+
+-- RIGHT JOIN - wszystkie naprawy z pracownikami (Lab 10)
+CREATE OR REPLACE VIEW v_pracownicy_naprawy AS
+SELECT 
+    p.id_pracownika,
+    p.imie || ' ' || p.nazwisko AS pracownik,
+    p.stanowisko,
+    n.id_naprawy,
+    n.status AS status_naprawy
+FROM naprawa n
+RIGHT JOIN pracownik p ON n.id_pracownika = p.id_pracownika;
+
+-- FULL OUTER JOIN - oplaty z uslugami (Lab 10)
+CREATE OR REPLACE VIEW v_oplaty_uslugi_full AS
+SELECT 
+    o.id_oplaty,
+    o.kwota,
+    o.status_oplaty,
+    u.id_uslugi,
+    u.nazwa_uslugi,
+    u.cena_za_jednostke
+FROM oplata o
+FULL OUTER JOIN uslugi u ON o.id_uslugi = u.id_uslugi;
+
+-- CROSS JOIN - kombinacje budynkow i uslug (Lab 10)
+CREATE OR REPLACE VIEW v_budynki_uslugi_cross AS
+SELECT 
+    b.id_budynku,
+    b.adres,
+    u.id_uslugi,
+    u.nazwa_uslugi
+FROM budynek b
+CROSS JOIN uslugi u;
+
+-- SELF JOIN - pracownicy w tym samym budynku (Lab 10)
+CREATE OR REPLACE VIEW v_pracownicy_koledzy AS
+SELECT 
+    p1.id_pracownika AS pracownik_id,
+    p1.imie || ' ' || p1.nazwisko AS pracownik,
+    p2.id_pracownika AS kolega_id,
+    p2.imie || ' ' || p2.nazwisko AS kolega,
+    p1.stanowisko
+FROM pracownik p1
+JOIN pracownik p2 ON p1.stanowisko = p2.stanowisko
+WHERE p1.id_pracownika < p2.id_pracownika;
+
+-- JOIN 3 tabel - czlonkowie z mieszkaniami i budynkami (Lab 10)
+CREATE OR REPLACE VIEW v_czlonkowie_pelne_info AS
+SELECT 
+    c.id_czlonka,
+    c.imie,
+    c.nazwisko,
+    c.telefon,
+    m.numer AS numer_mieszkania,
+    m.metraz,
+    b.adres AS adres_budynku,
+    b.liczba_pieter
+FROM czlonek c
+INNER JOIN mieszkanie m ON c.id_mieszkania = m.id_mieszkania
+INNER JOIN budynek b ON m.id_budynku = b.id_budynku;
+
+-- ============================================
+-- SEQUENCE (Lab 11)
+-- ============================================
+
+CREATE SEQUENCE spotkanie_seq START WITH 1000 INCREMENT BY 1;
+CREATE SEQUENCE naprawa_seq START WITH 1000 INCREMENT BY 1;
+
+-- ============================================
+-- PROCEDURY CRUD (Lab 11)
+-- ============================================
+
+-- Procedura INSERT dla czlonka (Lab 11)
+CREATE OR REPLACE PROCEDURE dodaj_czlonka(
+    p_id_mieszkania IN NUMBER,
+    p_imie IN VARCHAR2,
+    p_nazwisko IN VARCHAR2,
+    p_pesel IN VARCHAR2 DEFAULT NULL,
+    p_telefon IN VARCHAR2 DEFAULT NULL,
+    p_email IN VARCHAR2 DEFAULT NULL,
+    p_id_czlonka OUT NUMBER
+) AS
+BEGIN
+    INSERT INTO czlonek (id_mieszkania, imie, nazwisko, pesel, telefon, email)
+    VALUES (p_id_mieszkania, p_imie, p_nazwisko, p_pesel, p_telefon, p_email)
+    RETURNING id_czlonka INTO p_id_czlonka;
+    COMMIT;
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Czlonek o takim identyfikatorze juz istnieje');
+    WHEN OTHERS THEN
+        RAISE_APPLICATION_ERROR(-20003, 'Blad podczas dodawania czlonka: ' || SQLERRM);
+END;
+/
+
+-- Procedura UPDATE dla czlonka (Lab 11)
+CREATE OR REPLACE PROCEDURE aktualizuj_czlonka(
+    p_id_czlonka IN NUMBER,
+    p_imie IN VARCHAR2 DEFAULT NULL,
+    p_nazwisko IN VARCHAR2 DEFAULT NULL,
+    p_telefon IN VARCHAR2 DEFAULT NULL,
+    p_email IN VARCHAR2 DEFAULT NULL,
+    p_rows_updated OUT NUMBER
+) AS
+BEGIN
+    UPDATE czlonek
+    SET imie = NVL(p_imie, imie),
+        nazwisko = NVL(p_nazwisko, nazwisko),
+        telefon = NVL(p_telefon, telefon),
+        email = NVL(p_email, email)
+    WHERE id_czlonka = p_id_czlonka;
+    
+    p_rows_updated := SQL%ROWCOUNT;
+    
+    IF p_rows_updated = 0 THEN
+        RAISE_APPLICATION_ERROR(-20004, 'Nie znaleziono czlonka o ID: ' || p_id_czlonka);
+    END IF;
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE;
+END;
+/
+
+-- Procedura DELETE dla czlonka (Lab 11)
+CREATE OR REPLACE PROCEDURE usun_czlonka(
+    p_id_czlonka IN NUMBER,
+    p_rows_deleted OUT NUMBER
+) AS
+BEGIN
+    DELETE FROM czlonek WHERE id_czlonka = p_id_czlonka;
+    p_rows_deleted := SQL%ROWCOUNT;
+    
+    IF p_rows_deleted = 0 THEN
+        RAISE_APPLICATION_ERROR(-20005, 'Nie znaleziono czlonka o ID: ' || p_id_czlonka);
+    END IF;
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE;
+END;
+/
+
+-- Procedura z CURSOR wyswietlajaca naprawy (Lab 11)
+CREATE OR REPLACE PROCEDURE wyswietl_naprawy_wg_statusu(
+    p_status IN VARCHAR2,
+    p_result OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN p_result FOR
+        SELECT n.id_naprawy, n.opis, n.data_zgloszenia, n.data_wykonania,
+               m.numer AS numer_mieszkania,
+               p.imie || ' ' || p.nazwisko AS pracownik
+        FROM naprawa n
+        LEFT JOIN mieszkanie m ON n.id_mieszkania = m.id_mieszkania
+        LEFT JOIN pracownik p ON n.id_pracownika = p.id_pracownika
+        WHERE n.status = p_status
+        ORDER BY n.data_zgloszenia DESC;
+END;
+/
+
+-- Funkcja dodajaca spotkanie z SEQUENCE (Lab 11)
+CREATE OR REPLACE FUNCTION dodaj_spotkanie(
+    p_temat IN VARCHAR2,
+    p_miejsce IN VARCHAR2,
+    p_data IN DATE DEFAULT SYSDATE
+) RETURN NUMBER AS
+    v_id NUMBER;
+BEGIN
+    v_id := spotkanie_seq.NEXTVAL;
+    INSERT INTO spotkanie_mieszkancow (id_spotkania, temat, miejsce, data_spotkania)
+    VALUES (v_id, p_temat, p_miejsce, p_data);
+    COMMIT;
+    RETURN v_id;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RETURN -1;
+END;
+/
+
+-- Funkcja aktualizujaca saldo konta (Lab 11)
+CREATE OR REPLACE FUNCTION aktualizuj_saldo_konta(
+    p_id_konta IN NUMBER,
+    p_nowe_saldo IN NUMBER
+) RETURN NUMBER AS
+    v_rows NUMBER;
+BEGIN
+    UPDATE konto_bankowe
+    SET saldo = p_nowe_saldo
+    WHERE id_konta = p_id_konta;
+    
+    v_rows := SQL%ROWCOUNT;
+    COMMIT;
+    RETURN v_rows;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RETURN -1;
+END;
+/
+
+-- ============================================
+-- ROZSZERZONY PACKAGE (Lab 12)
+-- ============================================
+
+-- Dodanie do istniejacego package
+CREATE OR REPLACE PACKAGE coop_crud_pkg IS
+    -- CRUD procedures
+    PROCEDURE insert_budynek(p_adres VARCHAR2, p_liczba_pieter NUMBER, p_rok_budowy NUMBER, p_id OUT NUMBER);
+    PROCEDURE update_budynek(p_id NUMBER, p_adres VARCHAR2, p_liczba_pieter NUMBER);
+    PROCEDURE delete_budynek(p_id NUMBER, p_deleted OUT NUMBER);
+    
+    -- Funkcje z obsluga wyjatkow (Lab 12)
+    FUNCTION pobierz_nazwisko_czlonka(p_id NUMBER) RETURN VARCHAR2;
+    FUNCTION pobierz_adres_budynku(p_id NUMBER) RETURN VARCHAR2;
+    
+    -- Statystyki
+    FUNCTION statystyki_budynku(p_id_budynku NUMBER) RETURN VARCHAR2;
+END coop_crud_pkg;
+/
+
+CREATE OR REPLACE PACKAGE BODY coop_crud_pkg IS
+    
+    PROCEDURE insert_budynek(p_adres VARCHAR2, p_liczba_pieter NUMBER, p_rok_budowy NUMBER, p_id OUT NUMBER) IS
+    BEGIN
+        INSERT INTO budynek (adres, liczba_pieter, rok_budowy)
+        VALUES (p_adres, p_liczba_pieter, p_rok_budowy)
+        RETURNING id_budynku INTO p_id;
+        COMMIT;
+    EXCEPTION
+        WHEN DUP_VAL_ON_INDEX THEN
+            p_id := -1;
+            RAISE_APPLICATION_ERROR(-20010, 'Budynek o tym adresie juz istnieje');
+    END insert_budynek;
+    
+    PROCEDURE update_budynek(p_id NUMBER, p_adres VARCHAR2, p_liczba_pieter NUMBER) IS
+    BEGIN
+        UPDATE budynek 
+        SET adres = p_adres, liczba_pieter = p_liczba_pieter
+        WHERE id_budynku = p_id;
+        
+        IF SQL%ROWCOUNT = 0 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'Nie znaleziono budynku o ID: ' || p_id);
+        END IF;
+        COMMIT;
+    END update_budynek;
+    
+    PROCEDURE delete_budynek(p_id NUMBER, p_deleted OUT NUMBER) IS
+    BEGIN
+        DELETE FROM budynek WHERE id_budynku = p_id;
+        p_deleted := SQL%ROWCOUNT;
+        COMMIT;
+    EXCEPTION
+        WHEN OTHERS THEN
+            p_deleted := 0;
+            ROLLBACK;
+    END delete_budynek;
+    
+    FUNCTION pobierz_nazwisko_czlonka(p_id NUMBER) RETURN VARCHAR2 IS
+        v_nazwisko czlonek.nazwisko%TYPE;
+    BEGIN
+        SELECT nazwisko INTO v_nazwisko FROM czlonek WHERE id_czlonka = p_id;
+        RETURN v_nazwisko;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            RETURN 'Nie znaleziono';
+        WHEN TOO_MANY_ROWS THEN
+            RETURN 'Wiele wynikow';
+    END pobierz_nazwisko_czlonka;
+    
+    FUNCTION pobierz_adres_budynku(p_id NUMBER) RETURN VARCHAR2 IS
+        v_adres budynek.adres%TYPE;
+    BEGIN
+        SELECT adres INTO v_adres FROM budynek WHERE id_budynku = p_id;
+        RETURN v_adres;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            RETURN 'Nie znaleziono';
+    END pobierz_adres_budynku;
+    
+    FUNCTION statystyki_budynku(p_id_budynku NUMBER) RETURN VARCHAR2 IS
+        v_mieszkan NUMBER;
+        v_czlonkow NUMBER;
+        v_napraw NUMBER;
+    BEGIN
+        SELECT COUNT(*) INTO v_mieszkan FROM mieszkanie WHERE id_budynku = p_id_budynku;
+        
+        SELECT COUNT(*) INTO v_czlonkow 
+        FROM czlonek c 
+        JOIN mieszkanie m ON c.id_mieszkania = m.id_mieszkania 
+        WHERE m.id_budynku = p_id_budynku;
+        
+        SELECT COUNT(*) INTO v_napraw 
+        FROM naprawa n 
+        JOIN mieszkanie m ON n.id_mieszkania = m.id_mieszkania 
+        WHERE m.id_budynku = p_id_budynku;
+        
+        RETURN 'Mieszkan: ' || v_mieszkan || ', Czlonkow: ' || v_czlonkow || ', Napraw: ' || v_napraw;
+    EXCEPTION
+        WHEN OTHERS THEN
+            RETURN 'Blad: ' || SQLERRM;
+    END statystyki_budynku;
+    
+END coop_crud_pkg;
+/
+
+-- ============================================
 -- DANE TESTOWE
 -- ============================================
 
