@@ -53,53 +53,37 @@ export const Reports: React.FC = () => {
     }
 
     return (
-        <div className="space-y-8">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
-                        <PieChart size={24} className="text-white" />
-                    </div>
-                    <div>
-                        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Podsumowania</h2>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">Przegląd finansów i statystyk spółdzielni</p>
-                    </div>
-                </div>
-                <button onClick={loadData} className="p-3 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors" title="Odśwież dane">
-                    <RefreshCw size={20} className="text-slate-400" />
-                </button>
-            </div>
-
+        <div className="space-y-5">
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-6 text-white shadow-lg">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-white/20 rounded-xl">
-                            <Wallet size={20} />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg">
+                            <Wallet size={18} className="text-slate-600 dark:text-slate-300" />
                         </div>
-                        <span className="text-sm text-white/80 font-medium">Łączny przychód</span>
+                        <span className="text-sm text-slate-500 dark:text-slate-400">Łączny przychód</span>
                     </div>
-                    <p className="text-3xl font-black">
-                        {data?.total_revenue?.toLocaleString('pl-PL', { minimumFractionDigits: 2 })} <span className="text-lg font-normal">PLN</span>
+                    <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                        {data?.total_revenue?.toLocaleString('pl-PL', { minimumFractionDigits: 2 })} <span className="text-sm font-normal text-slate-500">PLN</span>
                     </p>
                 </div>
-                <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-6 text-white shadow-lg">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-white/20 rounded-xl">
-                            <Users size={20} />
+                <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg">
+                            <Users size={18} className="text-slate-600 dark:text-slate-300" />
                         </div>
-                        <span className="text-sm text-white/80 font-medium">Liczba mieszkańców</span>
+                        <span className="text-sm text-slate-500 dark:text-slate-400">Liczba mieszkańców</span>
                     </div>
-                    <p className="text-3xl font-black">{data?.members_count}</p>
+                    <p className="text-2xl font-bold text-slate-900 dark:text-white">{data?.members_count}</p>
                 </div>
-                <div className="bg-gradient-to-br from-red-500 to-rose-600 rounded-2xl p-6 text-white shadow-lg">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-white/20 rounded-xl">
-                            <AlertCircle size={20} />
+                <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg">
+                            <AlertCircle size={18} className="text-slate-600 dark:text-slate-300" />
                         </div>
-                        <span className="text-sm text-white/80 font-medium">Zaległe płatności</span>
+                        <span className="text-sm text-slate-500 dark:text-slate-400">Zaległe płatności</span>
                     </div>
-                    <p className="text-3xl font-black">{data?.arrears_count}</p>
+                    <p className="text-2xl font-bold text-slate-900 dark:text-white">{data?.arrears_count}</p>
                 </div>
             </div>
 
@@ -206,141 +190,145 @@ export const Reports: React.FC = () => {
             </div>
 
             {/* Modal: Stan opłat */}
-            {showOplatyModal && createPortal(
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4" onClick={() => setShowOplatyModal(false)}>
-                    <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden border border-slate-200 dark:border-slate-700" onClick={e => e.stopPropagation()}>
-                        <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 p-6 text-white">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-white/20 rounded-xl">
-                                        <Building2 size={26} />
+            {
+                showOplatyModal && createPortal(
+                    <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center z-[9999] p-4" onClick={() => setShowOplatyModal(false)}>
+                        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden border border-slate-200 dark:border-slate-700" onClick={e => e.stopPropagation()}>
+                            <div className="p-5 border-b border-slate-200 dark:border-slate-700">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                                            <Building2 size={22} className="text-slate-600 dark:text-slate-300" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-semibold text-lg text-slate-900 dark:text-white">Stan opłat wg mieszkań</h3>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400">Podsumowanie naliczonych kwot i zaległości</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 className="font-bold text-xl">Stan opłat wg mieszkań</h3>
-                                        <p className="text-indigo-200 text-sm">Podsumowanie naliczonych kwot i zaległości</p>
-                                    </div>
+                                    <button onClick={() => setShowOplatyModal(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
+                                        <X size={20} className="text-slate-400" />
+                                    </button>
                                 </div>
-                                <button onClick={() => setShowOplatyModal(false)} className="p-2.5 hover:bg-white/20 rounded-xl transition-colors">
-                                    <X size={22} />
+                            </div>
+
+                            <div className="overflow-x-auto max-h-[55vh]">
+                                <table className="w-full text-left">
+                                    <thead className="bg-slate-50 dark:bg-slate-800 sticky top-0">
+                                        <tr>
+                                            <th className="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Mieszkanie</th>
+                                            <th className="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-300 text-center uppercase">Liczba opłat</th>
+                                            <th className="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-300 text-right uppercase">Suma opłat</th>
+                                            <th className="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-300 text-right uppercase">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                                        {data?.apartments_summary?.map((apt, idx) => (
+                                            <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg">
+                                                            <Home size={16} className="text-slate-600 dark:text-slate-400" />
+                                                        </div>
+                                                        <span className="font-medium text-slate-800 dark:text-white">{apt.numer}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 text-center">
+                                                    <span className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-medium">
+                                                        {apt.liczba_oplat}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 text-right font-bold text-slate-900 dark:text-white text-lg">
+                                                    {apt.suma_oplat?.toFixed(2)} PLN
+                                                </td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold ${apt.zaleglosci > 0
+                                                        ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                                                        : 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                                                        }`}>
+                                                        {apt.zaleglosci > 0 ? <AlertCircle size={14} /> : <CheckCircle2 size={14} />}
+                                                        {apt.zaleglosci > 0 ? `${apt.zaleglosci?.toFixed(2)} PLN` : 'OK'}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex justify-end">
+                                <button onClick={() => setShowOplatyModal(false)} className="px-6 py-2.5 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 text-sm font-medium rounded-lg transition-colors">
+                                    Zamknij
                                 </button>
                             </div>
                         </div>
-
-                        <div className="overflow-x-auto max-h-[55vh]">
-                            <table className="w-full text-left">
-                                <thead className="bg-indigo-50 dark:bg-indigo-900/20 sticky top-0">
-                                    <tr>
-                                        <th className="px-6 py-4 text-xs font-bold text-indigo-800 dark:text-indigo-300 uppercase">Mieszkanie</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-indigo-800 dark:text-indigo-300 text-center uppercase">Liczba opłat</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-indigo-800 dark:text-indigo-300 text-right uppercase">Suma opłat</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-indigo-800 dark:text-indigo-300 text-right uppercase">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                                    {data?.apartments_summary?.map((apt, idx) => (
-                                        <tr key={idx} className="hover:bg-indigo-50/50 dark:hover:bg-indigo-900/10 transition-colors">
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
-                                                        <Home size={16} className="text-indigo-600 dark:text-indigo-400" />
-                                                    </div>
-                                                    <span className="font-bold text-slate-800 dark:text-white">{apt.numer}</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-center">
-                                                <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold">
-                                                    {apt.liczba_oplat}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 text-right font-black text-indigo-600 dark:text-indigo-400 text-lg">
-                                                {apt.suma_oplat?.toFixed(2)} PLN
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold ${apt.zaleglosci > 0
-                                                    ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                                                    : 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
-                                                    }`}>
-                                                    {apt.zaleglosci > 0 ? <AlertCircle size={14} /> : <CheckCircle2 size={14} />}
-                                                    {apt.zaleglosci > 0 ? `${apt.zaleglosci?.toFixed(2)} PLN` : 'OK'}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div className="p-5 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex justify-end">
-                            <button onClick={() => setShowOplatyModal(false)} className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-colors">
-                                Zamknij
-                            </button>
-                        </div>
-                    </div>
-                </div>,
-                document.body
-            )}
+                    </div>,
+                    document.body
+                )
+            }
 
             {/* Modal: Status napraw */}
-            {showNaprawyModal && createPortal(
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4" onClick={() => setShowNaprawyModal(false)}>
-                    <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden border border-slate-200 dark:border-slate-700" onClick={e => e.stopPropagation()}>
-                        <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-6 text-white">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-white/20 rounded-xl">
-                                        <Wrench size={26} />
+            {
+                showNaprawyModal && createPortal(
+                    <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center z-[9999] p-4" onClick={() => setShowNaprawyModal(false)}>
+                        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden border border-slate-200 dark:border-slate-700" onClick={e => e.stopPropagation()}>
+                            <div className="p-5 border-b border-slate-200 dark:border-slate-700">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                                            <Wrench size={22} className="text-slate-600 dark:text-slate-300" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-semibold text-lg text-slate-900 dark:text-white">Status zgłoszeń serwisowych</h3>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400">Przegląd napraw w toku i zakończonych</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 className="font-bold text-xl">Status zgłoszeń serwisowych</h3>
-                                        <p className="text-amber-100 text-sm">Przegląd napraw w toku i zakończonych</p>
-                                    </div>
+                                    <button onClick={() => setShowNaprawyModal(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
+                                        <X size={20} className="text-slate-400" />
+                                    </button>
                                 </div>
-                                <button onClick={() => setShowNaprawyModal(false)} className="p-2.5 hover:bg-white/20 rounded-xl transition-colors">
-                                    <X size={22} />
+                            </div>
+
+                            <div className="p-5 max-h-[55vh] overflow-y-auto space-y-3">
+                                {data?.repairs_status?.map((repair, idx) => (
+                                    <div key={idx} className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+                                        <div className="flex justify-between items-start gap-4">
+                                            <div className="flex-1">
+                                                <div className="flex items-start gap-3">
+                                                    <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg mt-0.5">
+                                                        <Wrench size={16} className="text-slate-600 dark:text-slate-400" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-medium text-slate-800 dark:text-white">{repair.opis}</p>
+                                                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5 flex items-center gap-2">
+                                                            <Users size={14} /> {repair.pracownik || 'Nieprzypisany'}
+                                                        </p>
+                                                        <p className="text-sm text-slate-400 dark:text-slate-500 mt-1.5 italic">{repair.opis_statusu}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium ${repair.status === 'wykonana'
+                                                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                                                : repair.status === 'w trakcie'
+                                                    ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
+                                                    : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+                                                }`}>
+                                                {repair.status}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex justify-end">
+                                <button onClick={() => setShowNaprawyModal(false)} className="px-6 py-2.5 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 text-sm font-medium rounded-lg transition-colors">
+                                    Zamknij
                                 </button>
                             </div>
                         </div>
-
-                        <div className="p-6 max-h-[55vh] overflow-y-auto space-y-4">
-                            {data?.repairs_status?.map((repair, idx) => (
-                                <div key={idx} className="bg-slate-50 dark:bg-slate-700/30 rounded-2xl p-5 border border-slate-200 dark:border-slate-600 hover:border-amber-200 dark:hover:border-amber-800 transition-colors">
-                                    <div className="flex justify-between items-start gap-4">
-                                        <div className="flex-1">
-                                            <div className="flex items-start gap-4">
-                                                <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-xl mt-0.5">
-                                                    <Wrench size={18} className="text-amber-600 dark:text-amber-400" />
-                                                </div>
-                                                <div>
-                                                    <p className="font-bold text-slate-800 dark:text-white">{repair.opis}</p>
-                                                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-2">
-                                                        <Users size={14} /> {repair.pracownik || 'Nieprzypisany'}
-                                                    </p>
-                                                    <p className="text-sm text-slate-400 dark:text-slate-500 mt-2 italic">{repair.opis_statusu}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <span className={`shrink-0 px-4 py-2 rounded-xl text-sm font-black ${repair.status === 'wykonana'
-                                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                                            : repair.status === 'w trakcie'
-                                                ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
-                                                : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-                                            }`}>
-                                            {repair.status}
-                                        </span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        <div className="p-5 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex justify-end">
-                            <button onClick={() => setShowNaprawyModal(false)} className="px-8 py-3 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-xl transition-colors">
-                                Zamknij
-                            </button>
-                        </div>
-                    </div>
-                </div>,
-                document.body
-            )}
-        </div>
+                    </div>,
+                    document.body
+                )
+            }
+        </div >
     );
 };

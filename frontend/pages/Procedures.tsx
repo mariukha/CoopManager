@@ -29,7 +29,7 @@ const REPORTS: ReportConfig[] = [
     name: 'Obciążenie pracowników',
     description: 'Wszystkie naprawy przypisane',
     icon: <ArrowRightLeft size={18} />,
-    gradient: 'from-blue-500 to-blue-600',
+    gradient: 'from-slate-800 to-slate-900 dark:from-slate-700 dark:to-slate-800',
     joinType: 'RIGHT JOIN',
     fetchFn: db.getPracownicyNaprawy,
   },
@@ -38,7 +38,7 @@ const REPORTS: ReportConfig[] = [
     name: 'Zestawienie opłat',
     description: 'Pełna macierz usług i opłat',
     icon: <Layers size={18} />,
-    gradient: 'from-purple-500 to-purple-600',
+    gradient: 'from-slate-800 to-slate-900 dark:from-slate-700 dark:to-slate-800',
     joinType: 'FULL JOIN',
     fetchFn: db.getOplatyUslugiFull,
   },
@@ -47,7 +47,7 @@ const REPORTS: ReportConfig[] = [
     name: 'Matryca budynki-usługi',
     description: 'Wszystkie kombinacje',
     icon: <Grid3X3 size={18} />,
-    gradient: 'from-orange-500 to-orange-600',
+    gradient: 'from-slate-800 to-slate-900 dark:from-slate-700 dark:to-slate-800',
     joinType: 'CROSS JOIN',
     fetchFn: db.getBudynkiUslugiCross,
   },
@@ -56,7 +56,7 @@ const REPORTS: ReportConfig[] = [
     name: 'Zespoły stanowiskowe',
     description: 'Pracownicy na tych samych stanowiskach',
     icon: <Link2 size={18} />,
-    gradient: 'from-teal-500 to-teal-600',
+    gradient: 'from-slate-800 to-slate-900 dark:from-slate-700 dark:to-slate-800',
     joinType: 'SELF JOIN',
     fetchFn: db.getPracownicyKoledzy,
   },
@@ -65,7 +65,7 @@ const REPORTS: ReportConfig[] = [
     name: 'Pełne dane mieszkańców',
     description: 'Członkowie + mieszkania + budynki',
     icon: <Users size={18} />,
-    gradient: 'from-indigo-500 to-indigo-600',
+    gradient: 'from-slate-800 to-slate-900 dark:from-slate-700 dark:to-slate-800',
     joinType: '3-TABLE JOIN',
     fetchFn: db.getCzlonkowiePelneInfo,
   },
@@ -302,17 +302,6 @@ export const Procedures: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="p-2.5 bg-gradient-to-br from-slate-700 to-slate-900 rounded-xl">
-          <Shield size={20} className="text-white" />
-        </div>
-        <div>
-          <h2 className="text-xl font-bold text-slate-800 dark:text-white">Narzędzia administratora</h2>
-          <p className="text-xs text-slate-500">Procedury, funkcje, pakiety PL/SQL</p>
-        </div>
-      </div>
-
       {/* Tabs */}
       <div className="flex gap-1 bg-slate-100 dark:bg-slate-800/50 p-1 rounded-xl">
         {tabs.map(tab => {
@@ -339,44 +328,42 @@ export const Procedures: React.FC = () => {
           {/* Indeksacja */}
           <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2 mb-3">
-              <Calculator size={16} className="text-blue-600" />
-              <span className="font-medium text-slate-800 dark:text-white text-sm">zwieksz_oplaty</span>
-              <span className="text-[10px] text-slate-400 ml-auto">Procedura</span>
+              <Calculator size={16} className="text-slate-600 dark:text-slate-400" />
+              <span className="font-medium text-slate-800 dark:text-white text-sm">Indeksacja cen</span>
             </div>
-            <p className="text-xs text-slate-500 mb-3">Zwiększa ceny usług o procent</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">Zwiększa ceny usług o podany procent</p>
             <div className="flex gap-2 mb-3">
               <input
                 type="number"
                 value={procent}
                 onChange={(e) => setProcent(Number(e.target.value))}
-                className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm"
+                className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white"
                 min={1} max={100}
               />
               <span className="flex items-center text-slate-400 text-sm">%</span>
             </div>
             <button onClick={handleIncreaseFees} disabled={isLoading}
-              className="w-full py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2">
+              className="w-full py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50 flex items-center justify-center gap-2">
               <Play size={14} /> Wykonaj
             </button>
           </div>
 
-          {/* Dynamic SQL */}
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+          {/* Licznik rekordów */}
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700 flex flex-col justify-center h-full">
             <div className="flex items-center gap-2 mb-3">
-              <Hash size={16} className="text-violet-600" />
-              <span className="font-medium text-slate-800 dark:text-white text-sm">policz_rekordy</span>
-              <span className="text-[10px] text-slate-400 ml-auto">Dynamic SQL</span>
+              <Hash size={16} className="text-slate-600 dark:text-slate-400" />
+              <span className="font-medium text-slate-800 dark:text-white text-sm">Licznik rekordów</span>
             </div>
-            <p className="text-xs text-slate-500 mb-3">Zlicza rekordy w tabeli</p>
-            <div className="flex gap-2 mb-3">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">Zlicza rekordy w wybranej tabeli</p>
+            <div className="flex gap-2 mt-auto">
               <select value={dynamicTable} onChange={(e) => setDynamicTable(e.target.value)}
-                className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm">
+                className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white">
                 {['budynek', 'mieszkanie', 'czlonek', 'pracownik', 'naprawa', 'oplata', 'uslugi'].map(t => (
                   <option key={t} value={t}>{t}</option>
                 ))}
               </select>
               <button onClick={handleCountRecords} disabled={isLoading}
-                className="px-4 py-2 bg-violet-600 text-white text-sm font-medium rounded-lg hover:bg-violet-700 disabled:opacity-50">
+                className="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50">
                 Policz
               </button>
             </div>
@@ -386,50 +373,48 @@ export const Procedures: React.FC = () => {
 
       {activeTab === 'members' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Dodaj Członka */}
+          {/* Nowy członek */}
           <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2 mb-3">
-              <Users size={16} className="text-green-600" />
-              <span className="font-medium text-slate-800 dark:text-white text-sm">dodaj_czlonka</span>
-              <span className="text-[10px] text-slate-400 ml-auto">Procedura</span>
+              <Users size={16} className="text-slate-600 dark:text-slate-400" />
+              <span className="font-medium text-slate-800 dark:text-white text-sm">Nowy członek</span>
             </div>
             <div className="space-y-2">
               <select value={czlonekForm.id_mieszkania} onChange={(e) => setCzlonekForm({ ...czlonekForm, id_mieszkania: Number(e.target.value) })}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm">
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white">
                 {mieszkania.map(m => (<option key={m.id_mieszkania} value={m.id_mieszkania}>Mieszkanie {m.numer}</option>))}
               </select>
               <div className="grid grid-cols-2 gap-2">
                 <input type="text" placeholder="Imię" value={czlonekForm.imie} onChange={(e) => setCzlonekForm({ ...czlonekForm, imie: e.target.value })}
-                  className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm" />
+                  className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white" />
                 <input type="text" placeholder="Nazwisko" value={czlonekForm.nazwisko} onChange={(e) => setCzlonekForm({ ...czlonekForm, nazwisko: e.target.value })}
-                  className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm" />
+                  className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white" />
               </div>
               <input type="text" placeholder="Telefon" value={czlonekForm.telefon} onChange={(e) => setCzlonekForm({ ...czlonekForm, telefon: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm" />
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white" />
             </div>
             <button onClick={handleDodajCzlonka} disabled={isLoading}
-              className="w-full mt-3 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-2">
+              className="w-full mt-3 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50 flex items-center justify-center gap-2">
               <UserPlus size={14} /> Dodaj członka
             </button>
           </div>
 
-          {/* Dodaj Spotkanie */}
+          {/* Nowe spotkanie */}
           <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2 mb-3">
-              <CalendarPlus size={16} className="text-indigo-600" />
-              <span className="font-medium text-slate-800 dark:text-white text-sm">dodaj_spotkanie</span>
-              <span className="text-[10px] text-slate-400 ml-auto">Funkcja + Sequence</span>
+              <CalendarPlus size={16} className="text-slate-600 dark:text-slate-400" />
+              <span className="font-medium text-slate-800 dark:text-white text-sm">Nowe spotkanie</span>
             </div>
             <div className="space-y-2">
               <input type="text" placeholder="Temat spotkania" value={spotkanieForm.temat} onChange={(e) => setSpotkanieForm({ ...spotkanieForm, temat: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm" />
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white" />
               <input type="text" placeholder="Miejsce" value={spotkanieForm.miejsce} onChange={(e) => setSpotkanieForm({ ...spotkanieForm, miejsce: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm" />
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white" />
               <input type="date" value={spotkanieForm.data} onChange={(e) => setSpotkanieForm({ ...spotkanieForm, data: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm" />
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white" />
             </div>
             <button onClick={handleDodajSpotkanie} disabled={isLoading}
-              className="w-full mt-3 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2">
+              className="w-full mt-3 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50 flex items-center justify-center gap-2">
               <CalendarPlus size={14} /> Zaplanuj spotkanie
             </button>
           </div>
@@ -438,49 +423,48 @@ export const Procedures: React.FC = () => {
 
       {activeTab === 'finance' && (
         <div className="space-y-4">
-          {/* Package Functions */}
+          {/* Funkcje finansowe */}
           <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2 mb-4">
-              <Package size={16} className="text-amber-600" />
-              <span className="font-medium text-slate-800 dark:text-white text-sm">coop_pkg</span>
-              <span className="text-[10px] text-slate-400 ml-auto">Pakiet PL/SQL</span>
+              <Package size={16} className="text-slate-600 dark:text-slate-400" />
+              <span className="font-medium text-slate-800 dark:text-white text-sm">Funkcje finansowe</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
-                <label className="text-xs text-slate-500 mb-1 block">Suma opłat mieszkania</label>
+                <label className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">Suma opłat mieszkania</label>
                 <div className="flex gap-2">
                   <select value={selectedMieszkanieForPkg} onChange={(e) => setSelectedMieszkanieForPkg(Number(e.target.value))}
-                    className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm">
+                    className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white">
                     {mieszkania.map(m => (<option key={m.id_mieszkania} value={m.id_mieszkania}>M. {m.numer}</option>))}
                   </select>
                   <button onClick={handlePackageSumaOplat} disabled={isLoading}
-                    className="px-3 py-2 bg-amber-600 text-white text-xs font-medium rounded-lg hover:bg-amber-700 disabled:opacity-50">
+                    className="px-3 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50">
                     <Wallet size={14} />
                   </button>
                 </div>
               </div>
               <div>
-                <label className="text-xs text-slate-500 mb-1 block">Naprawy pracownika</label>
+                <label className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">Naprawy pracownika</label>
                 <div className="flex gap-2">
                   <select value={selectedPracownikForPkg} onChange={(e) => setSelectedPracownikForPkg(Number(e.target.value))}
-                    className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm">
+                    className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white">
                     {pracownicy.map(p => (<option key={p.id_pracownika} value={p.id_pracownika}>{p.imie}</option>))}
                   </select>
                   <button onClick={handlePackagePoliczNaprawy} disabled={isLoading}
-                    className="px-3 py-2 bg-amber-600 text-white text-xs font-medium rounded-lg hover:bg-amber-700 disabled:opacity-50">
+                    className="px-3 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50">
                     <Wrench size={14} />
                   </button>
                 </div>
               </div>
               <div>
-                <label className="text-xs text-slate-500 mb-1 block">Statystyki budynku</label>
+                <label className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">Statystyki budynku</label>
                 <div className="flex gap-2">
                   <select value={selectedBudynekForPkg} onChange={(e) => setSelectedBudynekForPkg(Number(e.target.value))}
-                    className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm">
+                    className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white">
                     {budynki.map(b => (<option key={b.id_budynku} value={b.id_budynku}>{b.adres}</option>))}
                   </select>
                   <button onClick={handlePackageStatystykiBudynku} disabled={isLoading}
-                    className="px-3 py-2 bg-teal-600 text-white text-xs font-medium rounded-lg hover:bg-teal-700 disabled:opacity-50">
+                    className="px-3 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50">
                     <Building size={14} />
                   </button>
                 </div>
@@ -488,23 +472,22 @@ export const Procedures: React.FC = () => {
             </div>
           </div>
 
-          {/* Aktualizuj Saldo */}
+          {/* Aktualizacja salda */}
           <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2 mb-3">
-              <CreditCard size={16} className="text-emerald-600" />
-              <span className="font-medium text-slate-800 dark:text-white text-sm">aktualizuj_saldo</span>
-              <span className="text-[10px] text-slate-400 ml-auto">Procedura</span>
+              <CreditCard size={16} className="text-slate-600 dark:text-slate-400" />
+              <span className="font-medium text-slate-800 dark:text-white text-sm">Aktualizacja salda</span>
             </div>
             <div className="flex gap-2">
               <select value={kontaForm.id_konta} onChange={(e) => setKontaForm({ ...kontaForm, id_konta: Number(e.target.value) })}
-                className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm">
+                className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white">
                 {kontoBank.map(k => (<option key={k.id_konta} value={k.id_konta}>...{k.numer_konta.slice(-8)} ({k.saldo} PLN)</option>))}
               </select>
               <input type="number" step="0.01" placeholder="Nowe saldo" value={kontaForm.nowe_saldo}
                 onChange={(e) => setKontaForm({ ...kontaForm, nowe_saldo: Number(e.target.value) })}
-                className="w-32 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm" />
+                className="w-32 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white" />
               <button onClick={handleAktualizujSaldo} disabled={isLoading}
-                className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-50">
+                className="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50">
                 Zapisz
               </button>
             </div>
@@ -516,9 +499,8 @@ export const Procedures: React.FC = () => {
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
           <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <FileText size={16} className="text-violet-600" />
-              <span className="font-medium text-slate-800 dark:text-white text-sm">Historia zmian (Trigger)</span>
-              <span className="text-[10px] text-slate-400">trg_audit_czlonek</span>
+              <FileText size={16} className="text-slate-600 dark:text-slate-400" />
+              <span className="font-medium text-slate-800 dark:text-white text-sm">Historia zmian</span>
             </div>
             <button onClick={fetchLogs} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg">
               <RefreshCw size={14} className="text-slate-400" />
@@ -528,10 +510,10 @@ export const Procedures: React.FC = () => {
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 dark:bg-slate-700/50 sticky top-0">
                 <tr>
-                  <th className="px-4 py-3 text-xs font-medium text-slate-500">ID</th>
-                  <th className="px-4 py-3 text-xs font-medium text-slate-500">Członek</th>
-                  <th className="px-4 py-3 text-xs font-medium text-slate-500">Operacja</th>
-                  <th className="px-4 py-3 text-xs font-medium text-slate-500">Data</th>
+                  <th className="px-4 py-3 text-xs font-medium text-slate-500 dark:text-slate-400">ID</th>
+                  <th className="px-4 py-3 text-xs font-medium text-slate-500 dark:text-slate-400">Członek</th>
+                  <th className="px-4 py-3 text-xs font-medium text-slate-500 dark:text-slate-400">Operacja</th>
+                  <th className="px-4 py-3 text-xs font-medium text-slate-500 dark:text-slate-400">Data</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
@@ -567,45 +549,23 @@ export const Procedures: React.FC = () => {
               <button
                 key={report.id}
                 onClick={() => loadReportData(report)}
-                className={`bg-gradient-to-br ${report.gradient} rounded-xl p-4 text-left text-white
-                  hover:shadow-xl hover:scale-[1.02] transition-all duration-200 group relative overflow-hidden`}
+                className="bg-white dark:bg-slate-800 rounded-xl p-4 text-left border border-slate-200 dark:border-slate-700
+                  hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200 group"
               >
-                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10" />
-                <div className="relative">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="p-2 bg-white/20 rounded-lg backdrop-blur">
-                      {report.icon}
-                    </div>
-                    <Eye size={14} className="opacity-50 group-hover:opacity-100 transition-opacity" />
+                <div className="flex items-center justify-between mb-3">
+                  <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg">
+                    <span className="text-slate-600 dark:text-slate-300">{report.icon}</span>
                   </div>
-                  <h4 className="font-semibold text-sm leading-tight mb-1">
-                    {report.name}
-                  </h4>
-                  <p className="text-[10px] text-white/70 line-clamp-2 mb-2">
-                    {report.description}
-                  </p>
-                  <span className="text-[9px] text-white/50 bg-white/10 px-1.5 py-0.5 rounded">
-                    {report.joinType}
-                  </span>
+                  <Eye size={14} className="text-slate-400 opacity-50 group-hover:opacity-100 transition-opacity" />
                 </div>
+                <h4 className="font-semibold text-sm leading-tight mb-1 text-slate-800 dark:text-white">
+                  {report.name}
+                </h4>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2">
+                  {report.description}
+                </p>
               </button>
             ))}
-          </div>
-
-          {/* Info Section */}
-          <div className="bg-slate-100 dark:bg-slate-800/50 rounded-xl p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-slate-200 dark:bg-slate-700 rounded-lg">
-                <Database size={16} className="text-slate-500" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Widoki łączące dane z wielu tabel</p>
-                <p className="text-xs text-slate-500">Kliknij kartę aby wyświetlić dane z widoku</p>
-              </div>
-            </div>
-            <div className="text-xs text-slate-400">
-              RIGHT • FULL • CROSS • SELF • MULTI-TABLE JOIN
-            </div>
           </div>
         </div>
       )}
@@ -629,7 +589,7 @@ export const Procedures: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="font-bold text-lg">{selectedReport.name}</h3>
-                    <p className="text-white/70 text-xs">{selectedReport.joinType} • {selectedReport.description}</p>
+                    <p className="text-white/70 text-xs">{selectedReport.description}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

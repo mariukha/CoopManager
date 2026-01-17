@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import type { UserRole } from '../hooks/useAuth';
 
-interface NavItem {
+export interface NavItem {
   id: string;
   label: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
@@ -25,7 +25,7 @@ interface LayoutProps {
   userRole: UserRole;
 }
 
-const NAV_ITEMS: NavItem[] = [
+export const NAV_ITEMS: NavItem[] = [
   { id: 'dashboard', label: 'Pulpit główny', icon: LayoutDashboard, roles: ['admin'] },
   {
     id: 'nieruchomosci',
@@ -192,7 +192,7 @@ export const Layout: React.FC<LayoutProps> = ({
     <div className="flex h-screen bg-gray-100 dark:bg-slate-950 overflow-hidden transition-colors duration-300">
       <aside
         className={`fixed inset-y-0 left-0 z-50 w-72 bg-slate-900 text-white flex flex-col shadow-xl 
-          transition-transform duration-300 ease-in-out md:relative md:translate-x-0
+          transition-transform duration-300 ease-in-out md:fixed md:translate-x-0
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         <div className="p-5 border-b border-slate-800 flex justify-between items-center">
@@ -202,9 +202,9 @@ export const Layout: React.FC<LayoutProps> = ({
             </div>
             <div>
               <h1 className="text-sm font-bold tracking-tight text-white">
-                Spółdzielnia
+                System Zarządzania
               </h1>
-              <p className="text-[10px] text-slate-400 uppercase tracking-wider">System zarządzania</p>
+              <p className="text-[10px] text-slate-400 tracking-wide">Współdzielnią Mieszkaniową</p>
             </div>
           </div>
           <button
@@ -242,7 +242,7 @@ export const Layout: React.FC<LayoutProps> = ({
         />
       )}
 
-      <main className="flex-1 overflow-auto relative flex flex-col">
+      <main className="flex-1 overflow-auto relative flex flex-col md:ml-72">
         <header className="bg-white dark:bg-slate-900 shadow-sm sticky top-0 z-10 px-4 md:px-8 py-5 flex items-center justify-between border-b dark:border-slate-800 transition-colors duration-300">
           <div className="flex items-center gap-4">
             <button

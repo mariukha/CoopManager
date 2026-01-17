@@ -36,21 +36,24 @@ export const Dashboard: React.FC = () => {
     setIsLoading(true);
     try {
       const tables = ['budynek', 'mieszkanie', 'czlonek', 'pracownik', 'naprawa', 'oplata', 'umowa', 'uslugi'];
-      const tableStats: Record<string, number> = {};
 
-      for (const table of tables) {
-        try {
-          const result = await db.countRecords(table);
-          tableStats[table] = result.count;
-        } catch {
-          tableStats[table] = 0;
-        }
-      }
-
-      const [payments, buildings] = await Promise.all([
+      const [countsResults, payments, buildings] = await Promise.all([
+        Promise.all(tables.map(async (table) => {
+          try {
+            const result = await db.countRecords(table);
+            return { table, count: result.count };
+          } catch {
+            return { table, count: 0 };
+          }
+        })),
         db.getTableData('oplata'),
         db.getTableData<{ id_budynku: number; adres: string }>('budynek'),
       ]);
+
+      const tableStats = countsResults.reduce((acc, { table, count }) => {
+        acc[table] = count;
+        return acc;
+      }, {} as Record<string, number>);
 
       const totalFees = payments.reduce((sum, p) => sum + (Number(p.kwota) || 0), 0);
 
@@ -91,22 +94,7 @@ export const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-          <Database size={20} className="text-blue-600 dark:text-blue-400" />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold text-slate-800 dark:text-white">
-            Statystyki bazy danych
-          </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Przegląd statystyk spółdzielni
-          </p>
-        </div>
-      </div>
-
+    <div className="space-y-6">
       {/* Stats Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {Object.entries(stats.tableStats).map(([table, count]) => {
@@ -117,7 +105,7 @@ export const Dashboard: React.FC = () => {
               className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700"
             >
               <div className="flex items-center justify-between mb-3">
-                <div className={`p-2 rounded-lg bg-gradient-to-br ${info.color} text-white`}>
+                <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
                   {info.icon}
                 </div>
                 <span className="text-2xl font-bold text-slate-800 dark:text-white">
@@ -133,16 +121,16 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* Summary Card */}
-      <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-white">
+      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-blue-200 text-sm mb-1">Suma wszystkich opłat</p>
-            <p className="text-3xl font-bold">
+            <p className="text-slate-500 dark:text-slate-400 text-sm mb-1">Suma wszystkich opłat</p>
+            <p className="text-3xl font-bold text-slate-900 dark:text-white">
               {stats.totalFees.toLocaleString('pl-PL', { minimumFractionDigits: 2 })} PLN
             </p>
           </div>
-          <div className="p-4 bg-white/10 rounded-xl">
-            <Wallet size={32} />
+          <div className="p-3 bg-slate-100 dark:bg-slate-700 rounded-xl">
+            <Wallet size={28} className="text-slate-500 dark:text-slate-400" />
           </div>
         </div>
       </div>
@@ -150,8 +138,8 @@ export const Dashboard: React.FC = () => {
       {/* Buildings Section */}
       <div>
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-violet-100 dark:bg-violet-900/30 rounded-lg">
-            <Building2 size={20} className="text-violet-600 dark:text-violet-400" />
+          <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg">
+            <Building2 size={20} className="text-slate-600 dark:text-slate-400" />
           </div>
           <div>
             <h2 className="text-lg font-semibold text-slate-800 dark:text-white">
@@ -169,17 +157,17 @@ export const Dashboard: React.FC = () => {
               key={building.id_budynku}
               onClick={() => handleShowBuildingMembers(building.id_budynku, building.adres)}
               className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700 
-                text-left hover:border-violet-300 dark:hover:border-violet-700 hover:shadow-md transition-all group"
+                text-left hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-sm transition-all group"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-violet-100 dark:bg-violet-900/30 rounded-lg group-hover:bg-violet-200 dark:group-hover:bg-violet-900/50 transition-colors">
-                  <Building2 size={18} className="text-violet-600 dark:text-violet-400" />
+                <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg group-hover:bg-slate-200 dark:group-hover:bg-slate-600 transition-colors">
+                  <Building2 size={18} className="text-slate-600 dark:text-slate-400" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-slate-800 dark:text-white truncate">
                     {building.adres}
                   </p>
-                  <p className="text-xs text-violet-600 dark:text-violet-400">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     Zobacz członków →
                   </p>
                 </div>
@@ -213,7 +201,7 @@ export const Dashboard: React.FC = () => {
             <div className="p-5 max-h-80 overflow-y-auto">
               {loadingMembers ? (
                 <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-6 w-6 border-2 border-slate-300 border-t-violet-600" />
+                  <div className="animate-spin rounded-full h-6 w-6 border-2 border-slate-300 border-t-slate-600" />
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -222,8 +210,8 @@ export const Dashboard: React.FC = () => {
                       key={idx}
                       className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg"
                     >
-                      <div className="p-1.5 bg-violet-100 dark:bg-violet-900/30 rounded-md">
-                        <Users size={14} className="text-violet-600 dark:text-violet-400" />
+                      <div className="p-1.5 bg-slate-100 dark:bg-slate-600 rounded-md">
+                        <Users size={14} className="text-slate-600 dark:text-slate-300" />
                       </div>
                       <span className="text-sm text-slate-700 dark:text-slate-300">
                         {member}
@@ -237,7 +225,7 @@ export const Dashboard: React.FC = () => {
             <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
               <button
                 onClick={() => setIsMembersModalOpen(false)}
-                className="w-full py-2.5 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-lg transition-colors"
+                className="w-full py-2.5 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 text-sm font-medium rounded-lg transition-colors"
               >
                 Zamknij
               </button>

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import { Plus, Search, Trash2 } from 'lucide-react';
 
-import { Layout } from './components/Layout';
+import { Layout, NAV_ITEMS } from './components/Layout';
 import { DataTable } from './components/DataTable';
 import { Modal } from './components/Modal';
 import { Notification } from './components/Notification';
@@ -397,15 +397,19 @@ const App: React.FC = () => {
     }
 
     const columns = TABLE_COLUMNS[currentView] || [];
+
+    const foundItem = NAV_ITEMS.find(n => n.id === currentView) ||
+      NAV_ITEMS.flatMap(n => n.children || []).find(c => c.id === currentView);
+
     const pageTitle = userRole === 'resident'
       ? `Moje ${currentView === 'oplata' ? 'Opłaty' : 'Naprawy'}`
-      : currentView.replace(/_/g, ' ');
+      : (foundItem?.label || currentView.replace(/_/g, ' '));
 
     return (
       <div className="animate-in fade-in duration-500">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
           <div>
-            <h3 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
+            <h3 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
               {pageTitle}
             </h3>
             {userRole === 'resident' && (
