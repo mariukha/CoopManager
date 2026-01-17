@@ -45,16 +45,16 @@ export const NAV_ITEMS: NavItem[] = [
     children: [
       { id: 'czlonek', label: 'Członkowie', icon: Users, roles: ['admin'] },
       { id: 'umowa', label: 'Umowy', icon: FileSignature, roles: ['admin'] },
-      { id: 'konto_bankowe', label: 'Konta bankowe', icon: CreditCard, roles: ['admin'] },
     ]
   },
   {
     id: 'finanse',
     label: 'Finanse',
     icon: Wallet,
-    roles: ['admin', 'resident'],
+    roles: ['admin'],
     children: [
-      { id: 'oplata', label: 'Opłaty', icon: Wallet, roles: ['admin', 'resident'] },
+      { id: 'konto_spoldzielni', label: 'Konta spółdzielni', icon: CreditCard, roles: ['admin'] },
+      { id: 'oplata', label: 'Opłaty', icon: Wallet, roles: ['admin'] },
       { id: 'uslugi', label: 'Cennik usług', icon: Settings, roles: ['admin'] },
     ]
   },
@@ -62,15 +62,20 @@ export const NAV_ITEMS: NavItem[] = [
     id: 'serwis',
     label: 'Serwis techniczny',
     icon: Wrench,
-    roles: ['admin', 'resident'],
+    roles: ['admin'],
     children: [
-      { id: 'naprawa', label: 'Zgłoszenia napraw', icon: Hammer, roles: ['admin', 'resident'] },
+      { id: 'naprawa', label: 'Zgłoszenia napraw', icon: Hammer, roles: ['admin'] },
       { id: 'pracownik', label: 'Pracownicy', icon: UserCog, roles: ['admin'] },
     ]
   },
   { id: 'spotkanie_mieszkancow', label: 'Spotkania', icon: CalendarDays, roles: ['admin'] },
   { id: 'reports', label: 'Podsumowania', icon: FileText, roles: ['admin'] },
   { id: 'system', label: 'Narzędzia administratora', icon: Database, roles: ['admin'] },
+];
+
+// Nawigacja dla mieszkańca
+export const RESIDENT_NAV_ITEMS: NavItem[] = [
+  { id: 'resident-dashboard', label: 'Mój panel', icon: LayoutDashboard, roles: ['resident'] },
 ];
 
 const VIEWS_WITH_TITLE = ['dashboard', 'reports', 'system'];
@@ -95,7 +100,9 @@ export const Layout: React.FC<LayoutProps> = ({
     );
   };
 
-  const filteredNavItems = NAV_ITEMS.filter(item => item.roles.includes(userRole || 'resident'));
+  const filteredNavItems = userRole === 'resident'
+    ? RESIDENT_NAV_ITEMS
+    : NAV_ITEMS.filter(item => item.roles.includes(userRole || 'admin'));
 
   const handleNavigate = (id: string) => {
     onNavigate(id);
@@ -174,15 +181,16 @@ export const Layout: React.FC<LayoutProps> = ({
       <li key={item.id}>
         <button
           onClick={() => handleNavigate(item.id)}
-          className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors
+          className={`w-full flex items-center ${userRole === 'resident' ? 'justify-center' : 'gap-3 px-4'} py-3 text-sm font-medium rounded-lg transition-colors
             ${isActive
               ? 'bg-blue-600 text-white shadow-md'
               : 'text-slate-300 hover:bg-slate-800 hover:text-white'
             }`}
           aria-current={isActive ? 'page' : undefined}
+          title={getNavLabel(item)}
         >
           <Icon size={18} />
-          {getNavLabel(item)}
+          {userRole !== 'resident' && getNavLabel(item)}
         </button>
       </li>
     );
@@ -191,7 +199,7 @@ export const Layout: React.FC<LayoutProps> = ({
   return (
     <div className="flex h-screen bg-gray-100 dark:bg-slate-950 overflow-hidden transition-colors duration-300">
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 bg-slate-900 text-white flex flex-col shadow-xl 
+        className={`fixed inset-y-0 left-0 z-50 ${userRole === 'resident' ? 'w-20' : 'w-72'} bg-slate-900 text-white flex flex-col shadow-xl 
           transition-transform duration-300 ease-in-out md:fixed md:translate-x-0
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
@@ -200,12 +208,14 @@ export const Layout: React.FC<LayoutProps> = ({
             <div className="p-2 bg-blue-600 rounded-xl">
               <Building className="text-white" size={22} />
             </div>
-            <div>
-              <h1 className="text-sm font-bold tracking-tight text-white">
-                System Zarządzania
-              </h1>
-              <p className="text-[10px] text-slate-400 tracking-wide">Współdzielnią Mieszkaniową</p>
-            </div>
+            {userRole !== 'resident' && (
+              <div>
+                <h1 className="text-sm font-bold tracking-tight text-white">
+                  System Zarządzania
+                </h1>
+                <p className="text-[10px] text-slate-400 tracking-wide">Współdzielnią Mieszkaniową</p>
+              </div>
+            )}
           </div>
           <button
             onClick={() => setIsMobileMenuOpen(false)}
@@ -225,11 +235,12 @@ export const Layout: React.FC<LayoutProps> = ({
         <div className="p-4 border-t border-slate-800 bg-slate-950">
           <button
             onClick={onLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-400 
-              hover:bg-red-500/10 hover:text-red-300 rounded-lg transition-all group"
+            className={`w-full flex items-center ${userRole === 'resident' ? 'justify-center' : 'gap-3 px-4'} py-3 text-sm font-medium text-red-400 
+              hover:bg-red-500/10 hover:text-red-300 rounded-lg transition-all group`}
+            title="Wyloguj się"
           >
             <LogOut size={18} className="group-hover:translate-x-1 transition-transform" />
-            Wyloguj się
+            {userRole !== 'resident' && 'Wyloguj się'}
           </button>
         </div>
       </aside>
@@ -242,7 +253,7 @@ export const Layout: React.FC<LayoutProps> = ({
         />
       )}
 
-      <main className="flex-1 overflow-auto relative flex flex-col md:ml-72">
+      <main className={`flex-1 overflow-auto relative flex flex-col ${userRole === 'resident' ? 'md:ml-20' : 'md:ml-72'}`}>
         <header className="bg-white dark:bg-slate-900 shadow-sm sticky top-0 z-10 px-4 md:px-8 py-5 flex items-center justify-between border-b dark:border-slate-800 transition-colors duration-300">
           <div className="flex items-center gap-4">
             <button

@@ -12,6 +12,7 @@ import { Dashboard } from './pages/Dashboard';
 import { Procedures } from './pages/Procedures';
 import { Reports } from './pages/Reports';
 import { JoinViews } from './pages/JoinViews';
+import ResidentDashboard from './pages/ResidentDashboard';
 
 import { useAuth } from './hooks/useAuth';
 import { useTheme } from './hooks/useTheme';
@@ -57,6 +58,12 @@ const App: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<DatabaseRecord | null>(null);
   const [formData, setFormData] = useState<Record<string, string | number>>({});
+  const [loginError, setLoginError] = useState<string | null>(null);
+
+  const handleLogout = useCallback(() => {
+    logout();
+    setCurrentView('dashboard');
+  }, [logout]);
 
   useEffect(() => {
     setSelectedIds([]);
@@ -66,13 +73,14 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (isLoggedIn && userRole) {
-      setCurrentView(userRole === 'admin' ? 'dashboard' : 'oplata');
+      setCurrentView(userRole === 'admin' ? 'dashboard' : 'resident-dashboard');
     }
   }, [isLoggedIn, userRole]);
 
   const loadData = useCallback(async () => {
-    const specialViews = ['dashboard', 'system', 'reports'];
+    const specialViews = ['dashboard', 'system', 'reports', 'join-views'];
     if (specialViews.includes(currentView)) return;
+    if (!userRole) return;
 
     setIsLoading(true);
     try {
@@ -81,14 +89,19 @@ const App: React.FC = () => {
       if (userRole === 'admin') {
         data = await db.getTableData(`${currentView}?t=${Date.now()}`);
       } else {
+        if (!userData?.apt_id || userData.apt_id <= 0) {
+          setIsLoading(false);
+          return;
+        }
         const response = await axios.get(
-          `${API_BASE_URL}/resident/my-data/${userData?.apt_id}?t=${Date.now()}`
+          `${API_BASE_URL}/resident/my-data/${userData.apt_id}?t=${Date.now()}`
         );
         data = currentView === 'oplata' ? response.data.oplaty : response.data.naprawy;
       }
 
       setTableData(data || []);
-    } catch {
+    } catch (error) {
+      console.error('loadData error:', { currentView, userRole, userData, error });
       showNotification('Błąd ładowania danych.', 'error');
     } finally {
       setIsLoading(false);
@@ -268,14 +281,14 @@ const App: React.FC = () => {
       if (editingItem && idField) {
         await db.updateRecord(currentView, idField, editingItem[idField] as string | number, formData);
       } else {
-        // Dla oplata używamy funkcji dodaj_oplate_fn (Lab 11/12)
+        // Dodawanie nowej opłaty z automatycznym wyliczeniem kwoty
         if (currentView === 'oplata' && formData.id_mieszkania && formData.id_uslugi && formData.zuzycie) {
           const result = await db.callProcedureAddFee(
             Number(formData.id_mieszkania),
             Number(formData.id_uslugi),
             Number(formData.zuzycie)
           );
-          showNotification(`Lab 11 - dodaj_oplate_fn: ${result}`, 'success');
+          showNotification(`Opłata została dodana: ${result}`, 'success');
         } else {
           await db.insertRecord(currentView, formData);
         }
@@ -295,16 +308,18 @@ const App: React.FC = () => {
   };
 
   const handleAdminLogin = async (credentials: { login: string; haslo: string }) => {
+    setLoginError(null);
     const success = await loginAdmin(credentials);
     if (!success) {
-      showNotification('Błędne dane logowania.', 'error');
+      setLoginError('Błędne dane logowania');
     }
   };
 
-  const handleResidentLogin = async (credentials: { imie: string; nazwisko: string; numer: string }) => {
+  const handleResidentLogin = async (credentials: { email: string; numer: string }) => {
+    setLoginError(null);
     const success = await loginResident(credentials);
     if (!success) {
-      showNotification('Błędne dane logowania.', 'error');
+      setLoginError('Błędne dane logowania');
     }
   };
 
@@ -390,10 +405,24 @@ const App: React.FC = () => {
   };
 
   const renderContent = () => {
+    // Resident dashboard
+    if (userRole === 'resident' && currentView === 'resident-dashboard' && userData) {
+      return <ResidentDashboard user={{
+        id: userData.id,
+        imie: userData.imie || '',
+        nazwisko: userData.nazwisko || '',
+        email: userData.email || '',
+        apt_id: userData.apt_id || 0,
+        apt_num: userData.apt_num || '',
+        adres: userData.adres || ''
+      }} />;
+    }
+
     if (userRole === 'admin') {
       if (currentView === 'dashboard') return <Dashboard />;
       if (currentView === 'system') return <Procedures />;
       if (currentView === 'reports') return <Reports />;
+      if (currentView === 'join-views') return <JoinViews />;
     }
 
     const columns = TABLE_COLUMNS[currentView] || [];
@@ -471,6 +500,8 @@ const App: React.FC = () => {
         isDarkMode={isDarkMode}
         toggleDarkMode={toggleTheme}
         isLoading={authLoading}
+        error={loginError}
+        onClearError={() => setLoginError(null)}
       />
     );
   }
@@ -479,7 +510,7 @@ const App: React.FC = () => {
     <Layout
       currentView={currentView}
       onNavigate={setCurrentView}
-      onLogout={logout}
+      onLogout={handleLogout}
       isDarkMode={isDarkMode}
       toggleDarkMode={toggleTheme}
       userRole={userRole}

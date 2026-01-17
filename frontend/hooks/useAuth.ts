@@ -8,8 +8,12 @@ export interface UserData {
   id: number;
   login?: string;
   name?: string;
+  imie?: string;
+  nazwisko?: string;
+  email?: string;
   apt_num?: string;
   apt_id?: number;
+  adres?: string;
 }
 
 interface SessionData {
@@ -24,8 +28,7 @@ interface AdminCredentials {
 }
 
 interface ResidentCredentials {
-  imie: string;
-  nazwisko: string;
+  email: string;
   numer: string;
 }
 
@@ -59,7 +62,7 @@ export function useAuth() {
     setIsLoading(true);
     try {
       const response = await axios.post(`${API_BASE_URL}/login`, credentials);
-      
+
       if (response.data.success === true) {
         const session: SessionData = {
           user: response.data.user,
@@ -84,7 +87,7 @@ export function useAuth() {
     setIsLoading(true);
     try {
       const response = await axios.post(`${API_BASE_URL}/login/resident`, credentials);
-      
+
       if (response.data.success === true) {
         const session: SessionData = {
           user: response.data.user,

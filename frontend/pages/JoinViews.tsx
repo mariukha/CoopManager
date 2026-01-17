@@ -116,10 +116,6 @@ export const JoinViews: React.FC = () => {
                         <Database size={14} />
                         <span>5 raportów</span>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                        <BarChart3 size={14} />
-                        <span>Lab 10</span>
-                    </div>
                 </div>
             </div>
 

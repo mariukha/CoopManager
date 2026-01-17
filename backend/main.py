@@ -16,7 +16,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-VALID_TABLES = ["budynek", "mieszkanie", "czlonek", "pracownik", "naprawa", "uslugi", "oplata", "umowa", "konto_bankowe", "spotkanie_mieszkancow"]
+VALID_TABLES = ["budynek", "mieszkanie", "czlonek", "pracownik", "naprawa", "uslugi", "oplata", "umowa", "konto_spoldzielni", "spotkanie_mieszkancow"]
 
 def init_database():
     # Check if tables already exist (they should from Oracle startup scripts)
@@ -95,8 +95,7 @@ class LoginRequest(BaseModel):
     haslo: str
 
 class ResidentLoginRequest(BaseModel):
-    imie: str
-    nazwisko: str
+    email: str
     numer: str
 
 class RecordData(BaseModel):
@@ -134,13 +133,13 @@ async def login_resident(req: ResidentLoginRequest):
     try:
         with get_cursor() as (cursor, conn):
             cursor.execute("""
-                SELECT c.id_czlonka, c.imie, c.nazwisko, m.id_mieszkania, m.numer
+                SELECT c.id_czlonka, c.imie, c.nazwisko, c.email, m.id_mieszkania, m.numer, b.adres
                 FROM czlonek c
                 JOIN mieszkanie m ON c.id_mieszkania = m.id_mieszkania
-                WHERE LOWER(c.imie) = LOWER(:1)
-                  AND LOWER(c.nazwisko) = LOWER(:2)
-                  AND m.numer = :3
-            """, [req.imie, req.nazwisko, req.numer])
+                JOIN budynek b ON m.id_budynku = b.id_budynku
+                WHERE LOWER(c.email) = LOWER(:1)
+                  AND m.numer = :2
+            """, [req.email, req.numer])
             row = cursor.fetchone()
             if row:
                 return {
@@ -149,11 +148,13 @@ async def login_resident(req: ResidentLoginRequest):
                         "id": row[0],
                         "imie": row[1],
                         "nazwisko": row[2],
-                        "apt_id": row[3],
-                        "apt_num": row[4]
+                        "email": row[3],
+                        "apt_id": row[4],
+                        "apt_num": row[5],
+                        "adres": row[6]
                     }
                 }
-            raise HTTPException(status_code=401, detail="Nie znaleziono mieszkańca")
+            raise HTTPException(status_code=401, detail="Nie znaleziono mieszkańca z podanym emailem i numerem mieszkania")
     except HTTPException:
         raise
     except Exception as e:
@@ -773,6 +774,102 @@ async def pkg_statystyki_budynku(id_budynku: int):
         with get_cursor() as (cursor, conn):
             result = cursor.callfunc("coop_crud_pkg.statystyki_budynku", str, [id_budynku])
             return {"id_budynku": id_budynku, "statystyki": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
+
+# ============================================
+# PORTAL MIESZKANCA (Resident Portal)
+# ============================================
+
+# Moje oplaty
+@app.get("/resident/payments/{id_mieszkania}")
+async def get_resident_payments(id_mieszkania: int):
+    try:
+        with get_cursor() as (cursor, conn):
+            cursor.execute("""
+                SELECT id_oplaty, nazwa_uslugi, kwota, zuzycie, jednostka_miary, 
+                       data_naliczenia, status_oplaty
+                FROM v_moje_oplaty
+                WHERE id_mieszkania = :1
+                ORDER BY data_naliczenia DESC
+            """, [id_mieszkania])
+            columns = [col[0].lower() for col in cursor.description]
+            rows = cursor.fetchall()
+            return [serialize_row(row, columns) for row in rows]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
+
+# Moje naprawy
+@app.get("/resident/repairs/{id_mieszkania}")
+async def get_resident_repairs(id_mieszkania: int):
+    try:
+        with get_cursor() as (cursor, conn):
+            cursor.execute("""
+                SELECT n.id_naprawy, n.opis, n.data_zgloszenia, n.data_wykonania, 
+                       n.status, p.imie || ' ' || p.nazwisko AS pracownik
+                FROM naprawa n
+                LEFT JOIN pracownik p ON n.id_pracownika = p.id_pracownika
+                WHERE n.id_mieszkania = :1
+                ORDER BY n.data_zgloszenia DESC
+            """, [id_mieszkania])
+            columns = [col[0].lower() for col in cursor.description]
+            rows = cursor.fetchall()
+            return [serialize_row(row, columns) for row in rows]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
+
+class RepairRequest(BaseModel):
+    id_mieszkania: int
+    opis: str
+
+# Zglos naprawe
+@app.post("/resident/repairs")
+async def submit_repair(req: RepairRequest):
+    try:
+        with get_cursor() as (cursor, conn):
+            out_id = cursor.var(int)
+            cursor.execute("""
+                BEGIN zglos_naprawe(:1, :2, :3); END;
+            """, [req.id_mieszkania, req.opis, out_id])
+            conn.commit()
+            return {"success": True, "id_naprawy": out_id.getvalue(), "message": "Zgłoszenie przyjęte"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
+
+# Nadchodzace spotkania
+@app.get("/resident/meetings")
+async def get_upcoming_meetings():
+    try:
+        with get_cursor() as (cursor, conn):
+            cursor.execute("""
+                SELECT id_spotkania, temat, miejsce, data_spotkania
+                FROM spotkanie_mieszkancow
+                WHERE data_spotkania >= SYSDATE
+                ORDER BY data_spotkania ASC
+            """)
+            columns = [col[0].lower() for col in cursor.description]
+            rows = cursor.fetchall()
+            return [serialize_row(row, columns) for row in rows]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
+
+# Moje zuzycie
+@app.get("/resident/consumption/{id_mieszkania}")
+async def get_resident_consumption(id_mieszkania: int):
+    try:
+        with get_cursor() as (cursor, conn):
+            cursor.execute("""
+                SELECT u.nazwa_uslugi, SUM(o.zuzycie) as zuzycie, u.jednostka_miary, 
+                       SUM(o.kwota) as suma_kwot
+                FROM oplata o
+                JOIN uslugi u ON o.id_uslugi = u.id_uslugi
+                WHERE o.id_mieszkania = :1
+                GROUP BY u.nazwa_uslugi, u.jednostka_miary
+                ORDER BY suma_kwot DESC
+            """, [id_mieszkania])
+            columns = [col[0].lower() for col in cursor.description]
+            rows = cursor.fetchall()
+            return [serialize_row(row, columns) for row in rows]
     except Exception as e:
         raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
 

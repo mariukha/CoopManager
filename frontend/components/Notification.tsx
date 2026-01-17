@@ -23,7 +23,7 @@ export const Notification: React.FC<NotificationProps> = ({ notification, onClos
 
   return (
     <div
-      className={`fixed bottom-10 right-10 z-[100] p-6 rounded-[2.5rem] shadow-2xl border-2 
+      className={`fixed bottom-10 right-10 z-[99999] p-6 rounded-[2.5rem] shadow-2xl border-2 
         flex items-center gap-5 animate-in slide-in-from-right-10 transition-colors ${containerStyles}`}
     >
       <div className={`p-3 rounded-2xl ${iconContainerStyles}`}>

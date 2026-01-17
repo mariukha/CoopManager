@@ -58,10 +58,11 @@ export const TABLE_COLUMNS: Record<string, ColumnDefinition[]> = {
     { key: 'data_wygasniecia', label: 'Do', priority: true },
     { key: 'typ_umowy', label: 'Typ', priority: true },
   ],
-  konto_bankowe: [
+  konto_spoldzielni: [
     { key: 'id_konta', label: 'ID' },
-    { key: 'id_czlonka', label: 'Członek' },
+    { key: 'nazwa_konta', label: 'Nazwa', priority: true },
     { key: 'numer_konta', label: 'Nr konta', priority: true },
+    { key: 'id_uslugi', label: 'Usługa' },
     { key: 'saldo', label: 'Saldo (PLN)', priority: true },
   ],
   spotkanie_mieszkancow: [
@@ -81,7 +82,7 @@ export const FORM_FIELDS: Record<string, string[]> = {
   uslugi: ['nazwa_uslugi', 'jednostka_miary', 'cena_za_jednostke'],
   oplata: ['id_mieszkania', 'id_uslugi', 'zuzycie', 'kwota', 'status_oplaty'],
   umowa: ['id_mieszkania', 'id_czlonka', 'data_zawarcia', 'data_wygasniecia', 'typ_umowy'],
-  konto_bankowe: ['id_czlonka', 'numer_konta', 'saldo'],
+  konto_spoldzielni: ['nazwa_konta', 'numer_konta', 'id_uslugi', 'saldo'],
   spotkanie_mieszkancow: ['temat', 'miejsce', 'data_spotkania'],
 };
 

@@ -80,7 +80,7 @@ export const Procedures: React.FC = () => {
   const [mieszkania, setMieszkania] = useState<Mieszkanie[]>([]);
   const [budynki, setBudynki] = useState<Budynek[]>([]);
   const [pracownicy, setPracownicy] = useState<Array<{ id_pracownika: number; imie: string; nazwisko: string }>>([]);
-  const [kontoBank, setKontoBank] = useState<Array<{ id_konta: number; numer_konta: string; saldo: number }>>([]);
+  const [kontoBank, setKontoBank] = useState<Array<{ id_konta: number; nazwa_konta: string; numer_konta: string; saldo: number }>>([]);
 
   const [selectedMieszkanieForPkg, setSelectedMieszkanieForPkg] = useState<number>(0);
   const [selectedPracownikForPkg, setSelectedPracownikForPkg] = useState<number>(0);
@@ -89,7 +89,8 @@ export const Procedures: React.FC = () => {
 
   const [czlonekForm, setCzlonekForm] = useState({ id_mieszkania: 0, imie: '', nazwisko: '', telefon: '', email: '' });
   const [spotkanieForm, setSpotkanieForm] = useState({ temat: '', miejsce: '', data: '' });
-  const [kontaForm, setKontaForm] = useState({ id_konta: 0, nowe_saldo: 0 });
+  const [kontaForm, setKontaForm] = useState({ id_konta: 0, nowe_saldo: '0' });
+  const [budynekForm, setBudynekForm] = useState({ adres: '', liczba_pieter: '1', rok_budowy: String(new Date().getFullYear()) });
 
   const [dynamicTable, setDynamicTable] = useState('budynek');
   const [dynamicCount, setDynamicCount] = useState<number | null>(null);
@@ -118,7 +119,7 @@ export const Procedures: React.FC = () => {
         db.getTableData<Mieszkanie>('mieszkanie'),
         db.getTableData<{ id_pracownika: number; imie: string; nazwisko: string }>('pracownik'),
         db.getTableData<Budynek>('budynek'),
-        db.getTableData<{ id_konta: number; numer_konta: string; saldo: number; id_czlonka: number }>('konto_bankowe'),
+        db.getTableData<{ id_konta: number; nazwa_konta: string; numer_konta: string; saldo: number }>('konto_spoldzielni'),
       ]);
       setMieszkania(m);
       setPracownicy(p);
@@ -248,11 +249,33 @@ export const Procedures: React.FC = () => {
     if (!kontaForm.id_konta) return;
     setIsLoading(true);
     try {
-      await db.funcAktualizujSaldo(kontaForm.id_konta, kontaForm.nowe_saldo);
+      await db.funcAktualizujSaldo(kontaForm.id_konta, Number(kontaForm.nowe_saldo) || 0);
       showNotification('Saldo zaktualizowane', 'success');
       loadData();
     } catch {
       showNotification('Błąd aktualizacji', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDodajBudynek = async () => {
+    if (!budynekForm.adres) {
+      showNotification('Uzupełnij adres budynku', 'error');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const result = await db.pkgInsertBudynek({
+        adres: budynekForm.adres,
+        liczba_pieter: Number(budynekForm.liczba_pieter) || 1,
+        rok_budowy: Number(budynekForm.rok_budowy) || new Date().getFullYear()
+      });
+      showNotification(`Dodano budynek (ID: ${result.id_budynku})`, 'success');
+      setBudynekForm({ adres: '', liczba_pieter: '1', rok_budowy: String(new Date().getFullYear()) });
+      loadData();
+    } catch {
+      showNotification('Błąd dodawania budynku', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -343,7 +366,7 @@ export const Procedures: React.FC = () => {
               <span className="flex items-center text-slate-400 text-sm">%</span>
             </div>
             <button onClick={handleIncreaseFees} disabled={isLoading}
-              className="w-full py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50 flex items-center justify-center gap-2">
+              className="w-full py-2 bg-slate-900 dark:bg-blue-600 text-white dark:text-white text-sm font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-blue-500 disabled:opacity-50 flex items-center justify-center gap-2">
               <Play size={14} /> Wykonaj
             </button>
           </div>
@@ -363,7 +386,7 @@ export const Procedures: React.FC = () => {
                 ))}
               </select>
               <button onClick={handleCountRecords} disabled={isLoading}
-                className="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50">
+                className="px-4 py-2 bg-slate-900 dark:bg-blue-600 text-white dark:text-white text-sm font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-blue-500 disabled:opacity-50">
                 Policz
               </button>
             </div>
@@ -394,7 +417,7 @@ export const Procedures: React.FC = () => {
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white" />
             </div>
             <button onClick={handleDodajCzlonka} disabled={isLoading}
-              className="w-full mt-3 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50 flex items-center justify-center gap-2">
+              className="w-full mt-3 py-2 bg-slate-900 dark:bg-blue-600 text-white dark:text-white text-sm font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-blue-500 disabled:opacity-50 flex items-center justify-center gap-2">
               <UserPlus size={14} /> Dodaj członka
             </button>
           </div>
@@ -414,8 +437,30 @@ export const Procedures: React.FC = () => {
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white" />
             </div>
             <button onClick={handleDodajSpotkanie} disabled={isLoading}
-              className="w-full mt-3 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50 flex items-center justify-center gap-2">
+              className="w-full mt-3 py-2 bg-slate-900 dark:bg-blue-600 text-white dark:text-white text-sm font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-blue-500 disabled:opacity-50 flex items-center justify-center gap-2">
               <CalendarPlus size={14} /> Zaplanuj spotkanie
+            </button>
+          </div>
+
+          {/* Nowy budynek */}
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 mb-3">
+              <Building size={16} className="text-slate-600 dark:text-slate-400" />
+              <span className="font-medium text-slate-800 dark:text-white text-sm">Nowy budynek</span>
+            </div>
+            <div className="space-y-2">
+              <input type="text" placeholder="Adres budynku" value={budynekForm.adres} onChange={(e) => setBudynekForm({ ...budynekForm, adres: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white" />
+              <div className="grid grid-cols-2 gap-2">
+                <input type="number" placeholder="Liczba pięter" value={budynekForm.liczba_pieter} onChange={(e) => setBudynekForm({ ...budynekForm, liczba_pieter: e.target.value })}
+                  className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white" />
+                <input type="number" placeholder="Rok budowy" value={budynekForm.rok_budowy} onChange={(e) => setBudynekForm({ ...budynekForm, rok_budowy: e.target.value })}
+                  className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white" />
+              </div>
+            </div>
+            <button onClick={handleDodajBudynek} disabled={isLoading}
+              className="w-full mt-3 py-2 bg-slate-900 dark:bg-blue-600 text-white dark:text-white text-sm font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-blue-500 disabled:opacity-50 flex items-center justify-center gap-2">
+              <Building size={14} /> Dodaj budynek
             </button>
           </div>
         </div>
@@ -438,7 +483,7 @@ export const Procedures: React.FC = () => {
                     {mieszkania.map(m => (<option key={m.id_mieszkania} value={m.id_mieszkania}>M. {m.numer}</option>))}
                   </select>
                   <button onClick={handlePackageSumaOplat} disabled={isLoading}
-                    className="px-3 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50">
+                    className="px-3 py-2 bg-slate-900 dark:bg-blue-600 text-white dark:text-white text-xs font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-blue-500 disabled:opacity-50">
                     <Wallet size={14} />
                   </button>
                 </div>
@@ -451,7 +496,7 @@ export const Procedures: React.FC = () => {
                     {pracownicy.map(p => (<option key={p.id_pracownika} value={p.id_pracownika}>{p.imie}</option>))}
                   </select>
                   <button onClick={handlePackagePoliczNaprawy} disabled={isLoading}
-                    className="px-3 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50">
+                    className="px-3 py-2 bg-slate-900 dark:bg-blue-600 text-white dark:text-white text-xs font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-blue-500 disabled:opacity-50">
                     <Wrench size={14} />
                   </button>
                 </div>
@@ -464,7 +509,7 @@ export const Procedures: React.FC = () => {
                     {budynki.map(b => (<option key={b.id_budynku} value={b.id_budynku}>{b.adres}</option>))}
                   </select>
                   <button onClick={handlePackageStatystykiBudynku} disabled={isLoading}
-                    className="px-3 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50">
+                    className="px-3 py-2 bg-slate-900 dark:bg-blue-600 text-white dark:text-white text-xs font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-blue-500 disabled:opacity-50">
                     <Building size={14} />
                   </button>
                 </div>
@@ -481,13 +526,13 @@ export const Procedures: React.FC = () => {
             <div className="flex gap-2">
               <select value={kontaForm.id_konta} onChange={(e) => setKontaForm({ ...kontaForm, id_konta: Number(e.target.value) })}
                 className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white">
-                {kontoBank.map(k => (<option key={k.id_konta} value={k.id_konta}>...{k.numer_konta.slice(-8)} ({k.saldo} PLN)</option>))}
+                {kontoBank.map(k => (<option key={k.id_konta} value={k.id_konta}>{k.nazwa_konta} ({k.saldo} PLN)</option>))}
               </select>
               <input type="number" step="0.01" placeholder="Nowe saldo" value={kontaForm.nowe_saldo}
-                onChange={(e) => setKontaForm({ ...kontaForm, nowe_saldo: Number(e.target.value) })}
+                onChange={(e) => setKontaForm({ ...kontaForm, nowe_saldo: e.target.value })}
                 className="w-32 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white" />
               <button onClick={handleAktualizujSaldo} disabled={isLoading}
-                className="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50">
+                className="px-4 py-2 bg-slate-900 dark:bg-blue-600 text-white dark:text-white text-sm font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-blue-500 disabled:opacity-50">
                 Zapisz
               </button>
             </div>
@@ -668,42 +713,39 @@ export const Procedures: React.FC = () => {
         document.body
       )}
 
-      {/* Package Result Modal - Professional Design */}
+      {/* Package Result Modal */}
       {showPkgResultModal && pkgResult && createPortal(
         <div
-          className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
           onClick={() => setShowPkgResultModal(false)}
         >
           <div
-            className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-700"
+            className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-700"
             onClick={e => e.stopPropagation()}
           >
-            <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-amber-50 dark:bg-amber-900/20 rounded-xl flex items-center justify-center">
-                  <Package size={24} className="text-amber-600 dark:text-amber-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg text-slate-900 dark:text-white">Wynik operacji</h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Pakiet PL/SQL • coop_pkg</p>
-                </div>
+            <div className="p-5 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold text-slate-800 dark:text-white">Wynik operacji</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pakiet PL/SQL • coop_pkg</p>
               </div>
-            </div>
-            <div className="p-6">
-              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6">
-                <p className="text-2xl font-bold text-slate-900 dark:text-white text-center">{pkgResult}</p>
-              </div>
-              <div className="mt-4 flex items-center justify-center gap-2 text-sm text-green-600 dark:text-green-400">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Wykonano pomyślnie</span>
-              </div>
-            </div>
-            <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800">
               <button
                 onClick={() => setShowPkgResultModal(false)}
-                className="w-full px-4 py-3 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 text-sm font-medium rounded-lg transition-colors"
+                className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              >
+                <X size={18} className="text-slate-400" />
+              </button>
+            </div>
+
+            <div className="p-5">
+              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-6 text-center">
+                <p className="text-2xl font-bold text-slate-900 dark:text-white">{pkgResult}</p>
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+              <button
+                onClick={() => setShowPkgResultModal(false)}
+                className="w-full py-2.5 bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors"
               >
                 Zamknij
               </button>
@@ -713,43 +755,44 @@ export const Procedures: React.FC = () => {
         document.body
       )}
 
-      {/* Count Records Modal - Professional Design */}
+      {/* Count Records Modal */}
       {showCountModal && dynamicCount !== null && createPortal(
         <div
-          className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
           onClick={() => setShowCountModal(false)}
         >
           <div
-            className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-700"
+            className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-700"
             onClick={e => e.stopPropagation()}
           >
-            <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-violet-50 dark:bg-violet-900/20 rounded-xl flex items-center justify-center">
-                  <Hash size={24} className="text-violet-600 dark:text-violet-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg text-slate-900 dark:text-white">Wynik zapytania</h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Dynamic SQL • policz_rekordy</p>
-                </div>
+            <div className="p-5 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold text-slate-800 dark:text-white">Wynik zapytania</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Dynamic SQL • policz_rekordy</p>
               </div>
-            </div>
-            <div className="p-6">
-              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-8">
-                <div className="text-center">
-                  <span className="text-5xl font-bold text-slate-900 dark:text-white">{dynamicCount}</span>
-                  <p className="mt-2 text-slate-500 dark:text-slate-400">rekordów</p>
-                </div>
-              </div>
-              <div className="mt-4 flex items-center justify-center gap-2 px-4 py-2 bg-violet-50 dark:bg-violet-900/20 rounded-lg">
-                <Database size={16} className="text-violet-600 dark:text-violet-400" />
-                <span className="text-sm font-medium text-violet-700 dark:text-violet-300">Tabela: {dynamicTable}</span>
-              </div>
-            </div>
-            <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800">
               <button
                 onClick={() => setShowCountModal(false)}
-                className="w-full px-4 py-3 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 text-sm font-medium rounded-lg transition-colors"
+                className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              >
+                <X size={18} className="text-slate-400" />
+              </button>
+            </div>
+
+            <div className="p-5">
+              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-8 text-center">
+                <span className="text-5xl font-bold text-slate-900 dark:text-white">{dynamicCount}</span>
+                <p className="mt-2 text-slate-500 dark:text-slate-400">rekordów</p>
+              </div>
+              <div className="mt-4 flex items-center justify-center gap-2 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                <Database size={14} className="text-slate-600 dark:text-slate-300" />
+                <span className="text-sm text-slate-700 dark:text-slate-300">Tabela: {dynamicTable}</span>
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+              <button
+                onClick={() => setShowCountModal(false)}
+                className="w-full py-2.5 bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors"
               >
                 Zamknij
               </button>

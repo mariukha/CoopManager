@@ -208,15 +208,32 @@ export const db = {
     return response.data;
   },
 
-  // Dane mieszkańca
-  async getResidentData(aptId: number): Promise<{
-    oplaty: DatabaseRecord[];
-    naprawy: DatabaseRecord[];
-    spotkania: DatabaseRecord[];
-    umowy: DatabaseRecord[];
-    suma_oplat: number;
-  }> {
-    const response = await axios.get(`${API_BASE_URL}/resident/my-data/${aptId}`);
+  // ============================================
+  // PORTAL MIESZKANCA (Resident Portal)
+  // ============================================
+
+  async getResidentPayments(aptId: number): Promise<DatabaseRecord[]> {
+    const response = await axios.get(`${API_BASE_URL}/resident/payments/${aptId}`);
+    return response.data;
+  },
+
+  async getResidentRepairs(aptId: number): Promise<DatabaseRecord[]> {
+    const response = await axios.get(`${API_BASE_URL}/resident/repairs/${aptId}`);
+    return response.data;
+  },
+
+  async submitRepair(aptId: number, opis: string): Promise<{ id_naprawy: number; message: string }> {
+    const response = await axios.post(`${API_BASE_URL}/resident/repairs`, { id_mieszkania: aptId, opis });
+    return response.data;
+  },
+
+  async getUpcomingMeetings(): Promise<DatabaseRecord[]> {
+    const response = await axios.get(`${API_BASE_URL}/resident/meetings`);
+    return response.data;
+  },
+
+  async getResidentConsumption(aptId: number): Promise<DatabaseRecord[]> {
+    const response = await axios.get(`${API_BASE_URL}/resident/consumption/${aptId}`);
     return response.data;
   },
 };
