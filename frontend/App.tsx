@@ -42,7 +42,10 @@ const App: React.FC = () => {
   const { isDarkMode, toggleTheme } = useTheme();
   const { notification, showNotification, hideNotification } = useNotification();
 
-  const [currentView, setCurrentView] = useState('dashboard');
+  const [currentView, setCurrentView] = useState(() => {
+    const saved = localStorage.getItem('currentView');
+    return saved || 'dashboard';
+  });
   const [tableData, setTableData] = useState<DatabaseRecord[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -62,6 +65,7 @@ const App: React.FC = () => {
 
   const handleLogout = useCallback(() => {
     logout();
+    localStorage.removeItem('currentView');
     setCurrentView('dashboard');
   }, [logout]);
 
@@ -73,9 +77,17 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (isLoggedIn && userRole) {
-      setCurrentView(userRole === 'admin' ? 'dashboard' : 'resident-dashboard');
+      const saved = localStorage.getItem('currentView');
+      const defaultView = userRole === 'admin' ? 'dashboard' : 'resident-dashboard';
+      setCurrentView(saved || defaultView);
     }
   }, [isLoggedIn, userRole]);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      localStorage.setItem('currentView', currentView);
+    }
+  }, [currentView, isLoggedIn]);
 
   const loadData = useCallback(async () => {
     const specialViews = ['dashboard', 'system', 'reports', 'join-views'];
