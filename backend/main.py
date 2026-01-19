@@ -5,6 +5,7 @@ from typing import Optional, Any
 from datetime import datetime
 from db import get_cursor, get_connection
 import time
+import traceback
 
 app = FastAPI()
 
@@ -126,6 +127,8 @@ async def login(req: LoginRequest):
     except HTTPException:
         raise
     except Exception as e:
+        print(f"LOGIN ERROR: {e}")
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
 
 @app.post("/login/resident")
@@ -158,6 +161,8 @@ async def login_resident(req: ResidentLoginRequest):
     except HTTPException:
         raise
     except Exception as e:
+        print(f"LOGIN RESIDENT ERROR: {e}")
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
 
 @app.get("/data/{table}")
