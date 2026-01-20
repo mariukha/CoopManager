@@ -1,115 +1,80 @@
--- ============================================
--- CZYSZCZENIE BAZY DANYCH (DROP)
--- ============================================
+-- ================================================================================
+-- BAZA DANYCH SPOLDZIELNI MIESZKANIOWEJ - PROJEKT LABORATORYJNY
+-- Plik: INIT_DB.sql
+-- Opis: Skrypt inicjalizacji bazy danych z elementami Lab 7-13
+-- ================================================================================
 
--- Usuwanie tabel (kolejność nie jest kluczowa dzięki CASCADE CONSTRAINTS)
-BEGIN
-    EXECUTE IMMEDIATE 'DROP TABLE budynek CASCADE CONSTRAINTS'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+-- ================================================================================
+-- CZYSZCZENIE BAZY DANYCH (DROP)
+-- ================================================================================
+
+-- Usuwanie tabel
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE budynek CASCADE CONSTRAINTS'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
-BEGIN
-    EXECUTE IMMEDIATE 'DROP TABLE mieszkanie CASCADE CONSTRAINTS'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE mieszkanie CASCADE CONSTRAINTS'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
-BEGIN
-    EXECUTE IMMEDIATE 'DROP TABLE czlonek CASCADE CONSTRAINTS'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE czlonek CASCADE CONSTRAINTS'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
-BEGIN
-    EXECUTE IMMEDIATE 'DROP TABLE pracownik CASCADE CONSTRAINTS'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE pracownik CASCADE CONSTRAINTS'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
-BEGIN
-    EXECUTE IMMEDIATE 'DROP TABLE uslugi CASCADE CONSTRAINTS'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE uslugi CASCADE CONSTRAINTS'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
-BEGIN
-    EXECUTE IMMEDIATE 'DROP TABLE naprawa CASCADE CONSTRAINTS'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE naprawa CASCADE CONSTRAINTS'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
-BEGIN
-    EXECUTE IMMEDIATE 'DROP TABLE oplata CASCADE CONSTRAINTS'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE oplata CASCADE CONSTRAINTS'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
-BEGIN
-    EXECUTE IMMEDIATE 'DROP TABLE uzytkownicy CASCADE CONSTRAINTS'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE uzytkownicy CASCADE CONSTRAINTS'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
-BEGIN
-    EXECUTE IMMEDIATE 'DROP TABLE log_zmian_czlonka CASCADE CONSTRAINTS'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE log_zmian_czlonka CASCADE CONSTRAINTS'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
-BEGIN
-    EXECUTE IMMEDIATE 'DROP TABLE spotkanie_mieszkancow CASCADE CONSTRAINTS'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE spotkanie_mieszkancow CASCADE CONSTRAINTS'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
-BEGIN
-    EXECUTE IMMEDIATE 'DROP TABLE umowa CASCADE CONSTRAINTS'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE umowa CASCADE CONSTRAINTS'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
-BEGIN
-    EXECUTE IMMEDIATE 'DROP TABLE konto_spoldzielni CASCADE CONSTRAINTS'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE konto_spoldzielni CASCADE CONSTRAINTS'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
 
 -- Usuwanie sekwencji
-BEGIN
-    EXECUTE IMMEDIATE 'DROP SEQUENCE spotkanie_seq'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+BEGIN EXECUTE IMMEDIATE 'DROP SEQUENCE spotkanie_seq'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
-BEGIN
-    EXECUTE IMMEDIATE 'DROP SEQUENCE naprawa_seq'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+BEGIN EXECUTE IMMEDIATE 'DROP SEQUENCE naprawa_seq'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
 
--- Usuwanie widoków (Views)
-BEGIN
-    EXECUTE IMMEDIATE 'DROP VIEW v_mieszkania_info'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+-- Usuwanie widokow
+BEGIN EXECUTE IMMEDIATE 'DROP VIEW v_mieszkania_info'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
-BEGIN
-    EXECUTE IMMEDIATE 'DROP VIEW v_oplaty_summary'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+BEGIN EXECUTE IMMEDIATE 'DROP VIEW v_oplaty_summary'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
-BEGIN
-    EXECUTE IMMEDIATE 'DROP VIEW v_naprawy_status'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+BEGIN EXECUTE IMMEDIATE 'DROP VIEW v_naprawy_status'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
-BEGIN
-    EXECUTE IMMEDIATE 'DROP VIEW v_pracownicy_naprawy'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+BEGIN EXECUTE IMMEDIATE 'DROP VIEW v_pracownicy_naprawy'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
-BEGIN
-    EXECUTE IMMEDIATE 'DROP VIEW v_oplaty_uslugi_full'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+BEGIN EXECUTE IMMEDIATE 'DROP VIEW v_oplaty_uslugi_full'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
-BEGIN
-    EXECUTE IMMEDIATE 'DROP VIEW v_budynki_uslugi_cross'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+BEGIN EXECUTE IMMEDIATE 'DROP VIEW v_budynki_uslugi_cross'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
-BEGIN
-    EXECUTE IMMEDIATE 'DROP VIEW v_pracownicy_koledzy'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+BEGIN EXECUTE IMMEDIATE 'DROP VIEW v_pracownicy_koledzy'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
-BEGIN
-    EXECUTE IMMEDIATE 'DROP VIEW v_czlonkowie_pelne_info'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+BEGIN EXECUTE IMMEDIATE 'DROP VIEW v_czlonkowie_pelne_info'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
-BEGIN
-    EXECUTE IMMEDIATE 'DROP VIEW v_moje_oplaty'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+BEGIN EXECUTE IMMEDIATE 'DROP VIEW v_moje_oplaty'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
 
--- Usuwanie pakietów
-BEGIN
-    EXECUTE IMMEDIATE 'DROP PACKAGE coop_pkg'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+-- Usuwanie pakietow
+BEGIN EXECUTE IMMEDIATE 'DROP PACKAGE coop_pkg'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
-BEGIN
-    EXECUTE IMMEDIATE 'DROP PACKAGE coop_crud_pkg'; EXCEPTION WHEN OTHERS THEN NULL;
-END;
+BEGIN EXECUTE IMMEDIATE 'DROP PACKAGE coop_crud_pkg'; EXCEPTION WHEN OTHERS THEN NULL; END;
 /
 
+
+-- ================================================================================
+-- LAB 7: CREATE TABLE, PRIMARY KEY, FOREIGN KEY, INSERT, UPDATE, DELETE
+-- Strona: Panel Administratora -> Zakladki: Budynki, Mieszkania, Czlonkowie, 
+--         Pracownicy, Uslugi, Naprawy, Oplaty, Spotkania, Umowy, Konta
+-- ================================================================================
+
+-- LAB 7: Tabela budynek (CREATE TABLE, PRIMARY KEY, IDENTITY)
+-- Wyswietlana: Panel Administratora -> Budynki
 CREATE TABLE budynek (
     id_budynku NUMBER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
     adres VARCHAR2(200) NOT NULL,
@@ -118,6 +83,8 @@ CREATE TABLE budynek (
     liczba_mieszkan NUMBER
 );
 
+-- LAB 7: Tabela mieszkanie (FOREIGN KEY z CASCADE)
+-- Wyswietlana: Panel Administratora -> Mieszkania
 CREATE TABLE mieszkanie (
     id_mieszkania NUMBER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
     id_budynku NUMBER NOT NULL,
@@ -127,6 +94,8 @@ CREATE TABLE mieszkanie (
     CONSTRAINT fk_mieszkanie_budynek FOREIGN KEY (id_budynku) REFERENCES budynek(id_budynku) ON DELETE CASCADE
 );
 
+-- LAB 7: Tabela czlonek (FOREIGN KEY, DEFAULT value)
+-- Wyswietlana: Panel Administratora -> Czlonkowie
 CREATE TABLE czlonek (
     id_czlonka NUMBER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
     id_mieszkania NUMBER NOT NULL,
@@ -139,6 +108,8 @@ CREATE TABLE czlonek (
     CONSTRAINT fk_czlonek_mieszkanie FOREIGN KEY (id_mieszkania) REFERENCES mieszkanie(id_mieszkania) ON DELETE CASCADE
 );
 
+-- LAB 7: Tabela pracownik
+-- Wyswietlana: Panel Administratora -> Pracownicy
 CREATE TABLE pracownik (
     id_pracownika NUMBER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
     imie VARCHAR2(100) NOT NULL,
@@ -149,6 +120,8 @@ CREATE TABLE pracownik (
     data_zatrudnienia DATE DEFAULT SYSDATE
 );
 
+-- LAB 7: Tabela uslugi
+-- Wyswietlana: Panel Administratora -> Uslugi
 CREATE TABLE uslugi (
     id_uslugi NUMBER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
     nazwa_uslugi VARCHAR2(200) NOT NULL,
@@ -156,6 +129,8 @@ CREATE TABLE uslugi (
     jednostka_miary VARCHAR2(50)
 );
 
+-- LAB 7: Tabela naprawa (wiele FOREIGN KEY)
+-- Wyswietlana: Panel Administratora -> Naprawy, Portal Mieszkanca -> Moje Naprawy
 CREATE TABLE naprawa (
     id_naprawy NUMBER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
     id_mieszkania NUMBER NOT NULL,
@@ -168,6 +143,8 @@ CREATE TABLE naprawa (
     CONSTRAINT fk_naprawa_pracownik FOREIGN KEY (id_pracownika) REFERENCES pracownik(id_pracownika) ON DELETE CASCADE
 );
 
+-- LAB 7: Tabela oplata (wiele FOREIGN KEY)
+-- Wyswietlana: Panel Administratora -> Oplaty, Portal Mieszkanca -> Moje Oplaty
 CREATE TABLE oplata (
     id_oplaty NUMBER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
     id_mieszkania NUMBER NOT NULL,
@@ -180,22 +157,16 @@ CREATE TABLE oplata (
     CONSTRAINT fk_oplata_uslugi FOREIGN KEY (id_uslugi) REFERENCES uslugi(id_uslugi) ON DELETE CASCADE
 );
 
+-- LAB 7: Tabela uzytkownicy (dla logowania admina)
+-- Uzywana: Strona logowania administratora
 CREATE TABLE uzytkownicy (
     id NUMBER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
     login VARCHAR2(100) NOT NULL UNIQUE,
     haslo VARCHAR2(255) NOT NULL
 );
 
-CREATE TABLE log_zmian_czlonka (
-    id_logu NUMBER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
-    id_czlonka NUMBER,
-    operacja VARCHAR2(50),
-    stare_dane VARCHAR2(1000),
-    nowe_dane VARCHAR2(1000),
-    data_zmiany TIMESTAMP DEFAULT SYSTIMESTAMP
-);
-
--- Tabela spotkań mieszkańców (Lab 7)
+-- LAB 7: Tabela spotkanie_mieszkancow
+-- Wyswietlana: Panel Administratora -> Spotkania, Portal Mieszkanca -> Spotkania
 CREATE TABLE spotkanie_mieszkancow (
     id_spotkania NUMBER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
     temat VARCHAR2(200) NOT NULL,
@@ -203,7 +174,8 @@ CREATE TABLE spotkanie_mieszkancow (
     data_spotkania DATE DEFAULT SYSDATE
 );
 
--- Tabela umów (Lab 7)
+-- LAB 7: Tabela umowa
+-- Wyswietlana: Panel Administratora -> Umowy
 CREATE TABLE umowa (
     id_umowy NUMBER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
     id_mieszkania NUMBER NOT NULL,
@@ -215,7 +187,8 @@ CREATE TABLE umowa (
     CONSTRAINT fk_umowa_czlonek FOREIGN KEY (id_czlonka) REFERENCES czlonek(id_czlonka) ON DELETE CASCADE
 );
 
--- Tabela kont spółdzielni (rachunki za usługi)
+-- LAB 7: Tabela konto_spoldzielni
+-- Wyswietlana: Panel Administratora -> Konta Spoldzielni
 CREATE TABLE konto_spoldzielni (
     id_konta NUMBER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
     nazwa_konta VARCHAR2(100) NOT NULL,
@@ -225,148 +198,44 @@ CREATE TABLE konto_spoldzielni (
     CONSTRAINT fk_konto_usluga FOREIGN KEY (id_uslugi) REFERENCES uslugi(id_uslugi) ON DELETE CASCADE
 );
 
--- ============================================
--- PROCEDURY I FUNKCJE (Lab 11, 12)
--- ============================================
+-- LAB 7 + LAB 13: Tabela log_zmian_czlonka (dla triggera audytu)
+-- Wyswietlana: Panel Administratora -> Narzedzia -> Logi audytu
+CREATE TABLE log_zmian_czlonka (
+    id_logu NUMBER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+    id_czlonka NUMBER,
+    operacja VARCHAR2(50),
+    stare_dane VARCHAR2(1000),
+    nowe_dane VARCHAR2(1000),
+    data_zmiany TIMESTAMP DEFAULT SYSTIMESTAMP
+);
 
-CREATE OR REPLACE PROCEDURE zwieksz_oplaty(p_procent IN NUMBER DEFAULT 10) AS
-BEGIN
-    UPDATE uslugi SET cena_za_jednostke = cena_za_jednostke * (1 + p_procent / 100);
-    COMMIT;
-END;
-/
 
-CREATE OR REPLACE FUNCTION dodaj_oplate_fn(
-    p_id_mieszkania IN NUMBER,
-    p_id_uslugi IN NUMBER,
-    p_zuzycie IN NUMBER
-) RETURN NUMBER AS
-    v_cena NUMBER;
-    v_kwota NUMBER;
-BEGIN
-    SELECT cena_za_jednostke INTO v_cena FROM uslugi WHERE id_uslugi = p_id_uslugi;
-    v_kwota := v_cena * p_zuzycie;
-    
-    INSERT INTO oplata (id_mieszkania, id_uslugi, kwota, zuzycie)
-    VALUES (p_id_mieszkania, p_id_uslugi, v_kwota, p_zuzycie);
-    
-    COMMIT;
-    RETURN v_kwota;
-END;
-/
+-- ================================================================================
+-- LAB 8: SELECT z WHERE, ORDER BY, GROUP BY, AVG, MAX, MIN, COUNT, CASE
+-- Strona: Panel Administratora -> Raporty, Dashboard
+-- Uwaga: Te elementy sa uzyte w zapytaniach w backendzie (main.py)
+-- ================================================================================
+-- Przyklady uzycia w API:
+-- - GROUP BY: /reports/summary (grupowanie oplat wg uslug)
+-- - AVG, SUM, COUNT: /reports/summary (statystyki)
+-- - WHERE: wszystkie endpointy filtrujace dane
+-- - ORDER BY: sortowanie wynikow we wszystkich listach
 
--- Funkcja z CURSOR (Lab 11)
-CREATE OR REPLACE FUNCTION pobierz_czlonkow_budynku(p_id_budynku NUMBER) 
-RETURN VARCHAR2 AS
-    v_wynik VARCHAR2(4000) := '';
-    CURSOR c_czlonkowie IS
-        SELECT c.imie, c.nazwisko
-        FROM czlonek c
-        JOIN mieszkanie m ON c.id_mieszkania = m.id_mieszkania
-        WHERE m.id_budynku = p_id_budynku;
-BEGIN
-    FOR r IN c_czlonkowie LOOP
-        v_wynik := v_wynik || r.imie || ' ' || r.nazwisko || '; ';
-    END LOOP;
-    RETURN v_wynik;
-END;
-/
 
--- Funkcja dynamicznego SQL (Lab 13)
-CREATE OR REPLACE FUNCTION policz_rekordy(p_nazwa_tabeli VARCHAR2) 
-RETURN NUMBER AS
-    v_sql VARCHAR2(200);
-    v_wynik NUMBER;
-BEGIN
-    v_sql := 'SELECT COUNT(*) FROM ' || p_nazwa_tabeli;
-    EXECUTE IMMEDIATE v_sql INTO v_wynik;
-    RETURN v_wynik;
-EXCEPTION
-    WHEN OTHERS THEN
-        RETURN -1;
-END;
-/
+-- ================================================================================
+-- LAB 9: VIEWS (Widoki) - proste, zlozone, z agregacja, z CASE
+-- Strona: Panel Administratora -> Raporty, Portal Mieszkanca
+-- ================================================================================
 
--- ============================================
--- PACKAGE (Lab 12)
--- ============================================
-
-CREATE OR REPLACE PACKAGE coop_pkg IS
-    PROCEDURE zwieksz_oplaty_pkg(p_procent NUMBER DEFAULT 10);
-    FUNCTION policz_naprawy_pracownika(p_id_pracownika NUMBER) RETURN NUMBER;
-    FUNCTION suma_oplat_mieszkania(p_id_mieszkania NUMBER) RETURN NUMBER;
-END coop_pkg;
-/
-
-CREATE OR REPLACE PACKAGE BODY coop_pkg IS
-    PROCEDURE zwieksz_oplaty_pkg(p_procent NUMBER DEFAULT 10) IS
-    BEGIN
-        UPDATE uslugi SET cena_za_jednostke = cena_za_jednostke * (1 + p_procent / 100);
-        COMMIT;
-    END zwieksz_oplaty_pkg;
-
-    FUNCTION policz_naprawy_pracownika(p_id_pracownika NUMBER) RETURN NUMBER IS
-        v_count NUMBER;
-    BEGIN
-        SELECT COUNT(*) INTO v_count FROM naprawa WHERE id_pracownika = p_id_pracownika;
-        RETURN v_count;
-    EXCEPTION
-        WHEN NO_DATA_FOUND THEN
-            RETURN 0;
-    END policz_naprawy_pracownika;
-    
-    FUNCTION suma_oplat_mieszkania(p_id_mieszkania NUMBER) RETURN NUMBER IS
-        v_suma NUMBER;
-    BEGIN
-        SELECT NVL(SUM(kwota), 0) INTO v_suma FROM oplata WHERE id_mieszkania = p_id_mieszkania;
-        RETURN v_suma;
-    END suma_oplat_mieszkania;
-END coop_pkg;
-/
-
--- ============================================
--- TRIGGERY (Lab 13)
--- ============================================
-
-CREATE OR REPLACE TRIGGER trg_audit_czlonek
-AFTER INSERT OR UPDATE OR DELETE ON czlonek
-FOR EACH ROW
-BEGIN
-    IF INSERTING THEN
-        INSERT INTO log_zmian_czlonka (id_czlonka, operacja, nowe_dane)
-        VALUES (:NEW.id_czlonka, 'INSERT', :NEW.imie || ' ' || :NEW.nazwisko);
-    ELSIF UPDATING THEN
-        INSERT INTO log_zmian_czlonka (id_czlonka, operacja, stare_dane, nowe_dane)
-        VALUES (:OLD.id_czlonka, 'UPDATE', :OLD.imie || ' ' || :OLD.nazwisko, :NEW.imie || ' ' || :NEW.nazwisko);
-    ELSIF DELETING THEN
-        INSERT INTO log_zmian_czlonka (id_czlonka, operacja, stare_dane)
-        VALUES (:OLD.id_czlonka, 'DELETE', :OLD.imie || ' ' || :OLD.nazwisko);
-    END IF;
-END;
-/
-
--- Trigger walidacji kwoty (Lab 13)
-CREATE OR REPLACE TRIGGER trg_walidacja_oplaty
-BEFORE INSERT OR UPDATE OF kwota ON oplata
-FOR EACH ROW
-BEGIN
-    IF :NEW.kwota < 0 THEN
-        RAISE_APPLICATION_ERROR(-20001, 'Kwota oplaty nie moze byc ujemna');
-    END IF;
-END;
-/
-
--- ============================================
--- WIDOKI (Lab 9)
--- ============================================
-
--- Widok prosty
+-- LAB 9: Widok prosty - informacje o mieszkaniach z adresem budynku
+-- Uzywany: /views/mieszkania-info -> Panel Administratora -> Raporty
 CREATE OR REPLACE VIEW v_mieszkania_info AS
 SELECT m.id_mieszkania, m.numer, m.metraz, m.liczba_pokoi, b.adres
 FROM mieszkanie m
 JOIN budynek b ON m.id_budynku = b.id_budynku;
 
--- Widok złożony z agregacją
+-- LAB 9: Widok zlozony z agregacja (GROUP BY, SUM, COUNT, CASE)
+-- Uzywany: /views/oplaty-summary -> Panel Administratora -> Dashboard, Raporty
 CREATE OR REPLACE VIEW v_oplaty_summary AS
 SELECT 
     m.id_mieszkania,
@@ -378,7 +247,8 @@ FROM mieszkanie m
 LEFT JOIN oplata o ON m.id_mieszkania = o.id_mieszkania
 GROUP BY m.id_mieszkania, m.numer;
 
--- Widok z CASE (Lab 9)
+-- LAB 9: Widok z CASE - status napraw z opisem tekstowym
+-- Uzywany: /views/naprawy-status -> Panel Administratora -> Raporty
 CREATE OR REPLACE VIEW v_naprawy_status AS
 SELECT 
     n.id_naprawy,
@@ -394,11 +264,29 @@ SELECT
 FROM naprawa n
 LEFT JOIN pracownik p ON n.id_pracownika = p.id_pracownika;
 
--- ============================================
--- WIDOKI Z ROZNYMI JOIN (Lab 10)
--- ============================================
+-- LAB 9: Widok dla portalu mieszkanca - moje oplaty
+-- Uzywany: /resident/payments/{id} -> Portal Mieszkanca -> Moje Oplaty
+CREATE OR REPLACE VIEW v_moje_oplaty AS
+SELECT 
+    o.id_oplaty,
+    o.id_mieszkania,
+    u.nazwa_uslugi,
+    o.kwota,
+    o.zuzycie,
+    u.jednostka_miary,
+    o.data_naliczenia,
+    o.status_oplaty
+FROM oplata o
+JOIN uslugi u ON o.id_uslugi = u.id_uslugi;
 
--- RIGHT JOIN - wszystkie naprawy z pracownikami (Lab 10)
+
+-- ================================================================================
+-- LAB 10: Rozne typy JOIN (INNER, LEFT, RIGHT, FULL OUTER, CROSS, SELF, 3 tabele)
+-- Strona: Panel Administratora -> Raporty -> Widoki z JOIN
+-- ================================================================================
+
+-- LAB 10: RIGHT JOIN - pracownicy z ich naprawami (wszyscy pracownicy)
+-- Uzywany: /views/pracownicy-naprawy -> Raporty -> Pracownicy i naprawy
 CREATE OR REPLACE VIEW v_pracownicy_naprawy AS
 SELECT 
     p.id_pracownika,
@@ -409,7 +297,8 @@ SELECT
 FROM naprawa n
 RIGHT JOIN pracownik p ON n.id_pracownika = p.id_pracownika;
 
--- FULL OUTER JOIN - oplaty z uslugami (Lab 10)
+-- LAB 10: FULL OUTER JOIN - oplaty z uslugami (wszystkie kombinacje)
+-- Uzywany: /views/oplaty-uslugi-full -> Raporty -> Oplaty i uslugi
 CREATE OR REPLACE VIEW v_oplaty_uslugi_full AS
 SELECT 
     o.id_oplaty,
@@ -421,7 +310,8 @@ SELECT
 FROM oplata o
 FULL OUTER JOIN uslugi u ON o.id_uslugi = u.id_uslugi;
 
--- CROSS JOIN - kombinacje budynkow i uslug (Lab 10)
+-- LAB 10: CROSS JOIN - wszystkie kombinacje budynkow i uslug
+-- Uzywany: /views/budynki-uslugi-cross -> Raporty -> Budynki x Uslugi
 CREATE OR REPLACE VIEW v_budynki_uslugi_cross AS
 SELECT 
     b.id_budynku,
@@ -431,7 +321,8 @@ SELECT
 FROM budynek b
 CROSS JOIN uslugi u;
 
--- SELF JOIN - pracownicy w tym samym budynku (Lab 10)
+-- LAB 10: SELF JOIN - pracownicy na tym samym stanowisku (koledzy)
+-- Uzywany: /views/pracownicy-koledzy -> Raporty -> Koledzy z pracy
 CREATE OR REPLACE VIEW v_pracownicy_koledzy AS
 SELECT 
     p1.id_pracownika AS pracownik_id,
@@ -443,7 +334,8 @@ FROM pracownik p1
 JOIN pracownik p2 ON p1.stanowisko = p2.stanowisko
 WHERE p1.id_pracownika < p2.id_pracownika;
 
--- JOIN 3 tabel - czlonkowie z mieszkaniami i budynkami (Lab 10)
+-- LAB 10: JOIN 3 tabel - czlonkowie z pelna informacja (mieszkanie + budynek)
+-- Uzywany: /views/czlonkowie-pelne-info -> Raporty -> Pelne info o czlonkach
 CREATE OR REPLACE VIEW v_czlonkowie_pelne_info AS
 SELECT 
     c.id_czlonka,
@@ -458,18 +350,19 @@ FROM czlonek c
 INNER JOIN mieszkanie m ON c.id_mieszkania = m.id_mieszkania
 INNER JOIN budynek b ON m.id_budynku = b.id_budynku;
 
--- ============================================
--- SEQUENCE (Lab 11)
--- ============================================
 
+-- ================================================================================
+-- LAB 11: SEQUENCE, Funkcje, Procedury, CURSOR
+-- Strona: Panel Administratora -> rozne operacje CRUD
+-- ================================================================================
+
+-- LAB 11: SEQUENCE - generowanie ID dla spotkan
+-- Uzywany: przy dodawaniu spotkan przez funkcje
 CREATE SEQUENCE spotkanie_seq START WITH 1000 INCREMENT BY 1;
 CREATE SEQUENCE naprawa_seq START WITH 1000 INCREMENT BY 1;
 
--- ============================================
--- PROCEDURY CRUD (Lab 11)
--- ============================================
-
--- Procedura INSERT dla czlonka (Lab 11)
+-- LAB 11: Procedura INSERT dla czlonka (z obsluga wyjatkow)
+-- Uzywana: /procedures/dodaj-czlonka -> Panel Admin -> Czlonkowie -> Dodaj
 CREATE OR REPLACE PROCEDURE dodaj_czlonka(
     p_id_mieszkania IN NUMBER,
     p_imie IN VARCHAR2,
@@ -492,7 +385,8 @@ EXCEPTION
 END;
 /
 
--- Procedura UPDATE dla czlonka (Lab 11)
+-- LAB 11: Procedura UPDATE dla czlonka
+-- Uzywana: /procedures/aktualizuj-czlonka/{id} -> Panel Admin -> Czlonkowie -> Edytuj
 CREATE OR REPLACE PROCEDURE aktualizuj_czlonka(
     p_id_czlonka IN NUMBER,
     p_imie IN VARCHAR2 DEFAULT NULL,
@@ -508,21 +402,18 @@ BEGIN
         telefon = NVL(p_telefon, telefon),
         email = NVL(p_email, email)
     WHERE id_czlonka = p_id_czlonka;
-    
     p_rows_updated := SQL%ROWCOUNT;
-    
     IF p_rows_updated = 0 THEN
         RAISE_APPLICATION_ERROR(-20004, 'Nie znaleziono czlonka o ID: ' || p_id_czlonka);
     END IF;
     COMMIT;
 EXCEPTION
-    WHEN OTHERS THEN
-        ROLLBACK;
-        RAISE;
+    WHEN OTHERS THEN ROLLBACK; RAISE;
 END;
 /
 
--- Procedura DELETE dla czlonka (Lab 11)
+-- LAB 11: Procedura DELETE dla czlonka
+-- Uzywana: /procedures/usun-czlonka/{id} -> Panel Admin -> Czlonkowie -> Usun
 CREATE OR REPLACE PROCEDURE usun_czlonka(
     p_id_czlonka IN NUMBER,
     p_rows_deleted OUT NUMBER
@@ -530,19 +421,35 @@ CREATE OR REPLACE PROCEDURE usun_czlonka(
 BEGIN
     DELETE FROM czlonek WHERE id_czlonka = p_id_czlonka;
     p_rows_deleted := SQL%ROWCOUNT;
-    
     IF p_rows_deleted = 0 THEN
         RAISE_APPLICATION_ERROR(-20005, 'Nie znaleziono czlonka o ID: ' || p_id_czlonka);
     END IF;
     COMMIT;
 EXCEPTION
-    WHEN OTHERS THEN
-        ROLLBACK;
-        RAISE;
+    WHEN OTHERS THEN ROLLBACK; RAISE;
 END;
 /
 
--- Procedura z CURSOR wyswietlajaca naprawy (Lab 11)
+-- LAB 11: Funkcja z CURSOR - pobiera liste czlonkow budynku
+-- Uzywana: /functions/members-of-building/{id} -> Raporty
+CREATE OR REPLACE FUNCTION pobierz_czlonkow_budynku(p_id_budynku NUMBER) 
+RETURN VARCHAR2 AS
+    v_wynik VARCHAR2(4000) := '';
+    CURSOR c_czlonkowie IS
+        SELECT c.imie, c.nazwisko
+        FROM czlonek c
+        JOIN mieszkanie m ON c.id_mieszkania = m.id_mieszkania
+        WHERE m.id_budynku = p_id_budynku;
+BEGIN
+    FOR r IN c_czlonkowie LOOP
+        v_wynik := v_wynik || r.imie || ' ' || r.nazwisko || '; ';
+    END LOOP;
+    RETURN v_wynik;
+END;
+/
+
+-- LAB 11: Procedura z CURSOR - naprawy wg statusu
+-- Uzywana wewnetrznie w raportach
 CREATE OR REPLACE PROCEDURE wyswietl_naprawy_wg_statusu(
     p_status IN VARCHAR2,
     p_result OUT SYS_REFCURSOR
@@ -560,7 +467,8 @@ BEGIN
 END;
 /
 
--- Funkcja dodajaca spotkanie (uzywa IDENTITY tabeli)
+-- LAB 11: Funkcja dodajaca spotkanie (z SEQUENCE/IDENTITY)
+-- Uzywana: /functions/dodaj-spotkanie -> Panel Admin -> Spotkania -> Dodaj
 CREATE OR REPLACE FUNCTION dodaj_spotkanie(
     p_temat IN VARCHAR2,
     p_miejsce IN VARCHAR2,
@@ -574,157 +482,57 @@ BEGIN
     COMMIT;
     RETURN v_id;
 EXCEPTION
-    WHEN OTHERS THEN
-        ROLLBACK;
-        RETURN -1;
+    WHEN OTHERS THEN ROLLBACK; RETURN -1;
 END;
 /
 
--- Funkcja aktualizujaca saldo konta spółdzielni
+-- LAB 11: Funkcja dodawania oplaty (oblicza kwote automatycznie)
+-- Uzywana: /procedures/add-fee -> Panel Admin -> Narzedzia -> Dodaj oplate
+CREATE OR REPLACE FUNCTION dodaj_oplate_fn(
+    p_id_mieszkania IN NUMBER,
+    p_id_uslugi IN NUMBER,
+    p_zuzycie IN NUMBER
+) RETURN NUMBER AS
+    v_cena NUMBER;
+    v_kwota NUMBER;
+BEGIN
+    SELECT cena_za_jednostke INTO v_cena FROM uslugi WHERE id_uslugi = p_id_uslugi;
+    v_kwota := v_cena * p_zuzycie;
+    INSERT INTO oplata (id_mieszkania, id_uslugi, kwota, zuzycie)
+    VALUES (p_id_mieszkania, p_id_uslugi, v_kwota, p_zuzycie);
+    COMMIT;
+    RETURN v_kwota;
+END;
+/
+
+-- LAB 11: Funkcja aktualizacji salda konta
+-- Uzywana: /functions/aktualizuj-saldo/{id} -> Panel Admin -> Konta
 CREATE OR REPLACE FUNCTION aktualizuj_saldo_konta(
     p_id_konta IN NUMBER,
     p_nowe_saldo IN NUMBER
 ) RETURN NUMBER AS
     v_rows NUMBER;
 BEGIN
-    UPDATE konto_spoldzielni
-    SET saldo = p_nowe_saldo
-    WHERE id_konta = p_id_konta;
-    
+    UPDATE konto_spoldzielni SET saldo = p_nowe_saldo WHERE id_konta = p_id_konta;
     v_rows := SQL%ROWCOUNT;
     COMMIT;
     RETURN v_rows;
 EXCEPTION
-    WHEN OTHERS THEN
-        ROLLBACK;
-        RETURN -1;
+    WHEN OTHERS THEN ROLLBACK; RETURN -1;
 END;
 /
 
--- ============================================
--- ROZSZERZONY PACKAGE (Lab 12)
--- ============================================
-
--- Dodanie do istniejacego package
-CREATE OR REPLACE PACKAGE coop_crud_pkg IS
-    -- CRUD procedures
-    PROCEDURE insert_budynek(p_adres VARCHAR2, p_liczba_pieter NUMBER, p_rok_budowy NUMBER, p_id OUT NUMBER);
-    PROCEDURE update_budynek(p_id NUMBER, p_adres VARCHAR2, p_liczba_pieter NUMBER);
-    PROCEDURE delete_budynek(p_id NUMBER, p_deleted OUT NUMBER);
-    
-    -- Funkcje z obsluga wyjatkow (Lab 12)
-    FUNCTION pobierz_nazwisko_czlonka(p_id NUMBER) RETURN VARCHAR2;
-    FUNCTION pobierz_adres_budynku(p_id NUMBER) RETURN VARCHAR2;
-    
-    -- Statystyki
-    FUNCTION statystyki_budynku(p_id_budynku NUMBER) RETURN VARCHAR2;
-END coop_crud_pkg;
+-- LAB 11: Procedura zwiekszania cen uslug
+-- Uzywana: /procedures/increase-fees -> Panel Admin -> Narzedzia
+CREATE OR REPLACE PROCEDURE zwieksz_oplaty(p_procent IN NUMBER DEFAULT 10) AS
+BEGIN
+    UPDATE uslugi SET cena_za_jednostke = cena_za_jednostke * (1 + p_procent / 100);
+    COMMIT;
+END;
 /
 
-CREATE OR REPLACE PACKAGE BODY coop_crud_pkg IS
-    
-    PROCEDURE insert_budynek(p_adres VARCHAR2, p_liczba_pieter NUMBER, p_rok_budowy NUMBER, p_id OUT NUMBER) IS
-    BEGIN
-        INSERT INTO budynek (adres, liczba_pieter, rok_budowy)
-        VALUES (p_adres, p_liczba_pieter, p_rok_budowy)
-        RETURNING id_budynku INTO p_id;
-        COMMIT;
-    EXCEPTION
-        WHEN DUP_VAL_ON_INDEX THEN
-            p_id := -1;
-            RAISE_APPLICATION_ERROR(-20010, 'Budynek o tym adresie juz istnieje');
-    END insert_budynek;
-    
-    PROCEDURE update_budynek(p_id NUMBER, p_adres VARCHAR2, p_liczba_pieter NUMBER) IS
-    BEGIN
-        UPDATE budynek 
-        SET adres = p_adres, liczba_pieter = p_liczba_pieter
-        WHERE id_budynku = p_id;
-        
-        IF SQL%ROWCOUNT = 0 THEN
-            RAISE_APPLICATION_ERROR(-20011, 'Nie znaleziono budynku o ID: ' || p_id);
-        END IF;
-        COMMIT;
-    END update_budynek;
-    
-    PROCEDURE delete_budynek(p_id NUMBER, p_deleted OUT NUMBER) IS
-    BEGIN
-        DELETE FROM budynek WHERE id_budynku = p_id;
-        p_deleted := SQL%ROWCOUNT;
-        COMMIT;
-    EXCEPTION
-        WHEN OTHERS THEN
-            p_deleted := 0;
-            ROLLBACK;
-    END delete_budynek;
-    
-    FUNCTION pobierz_nazwisko_czlonka(p_id NUMBER) RETURN VARCHAR2 IS
-        v_nazwisko czlonek.nazwisko%TYPE;
-    BEGIN
-        SELECT nazwisko INTO v_nazwisko FROM czlonek WHERE id_czlonka = p_id;
-        RETURN v_nazwisko;
-    EXCEPTION
-        WHEN NO_DATA_FOUND THEN
-            RETURN 'Nie znaleziono';
-        WHEN TOO_MANY_ROWS THEN
-            RETURN 'Wiele wynikow';
-    END pobierz_nazwisko_czlonka;
-    
-    FUNCTION pobierz_adres_budynku(p_id NUMBER) RETURN VARCHAR2 IS
-        v_adres budynek.adres%TYPE;
-    BEGIN
-        SELECT adres INTO v_adres FROM budynek WHERE id_budynku = p_id;
-        RETURN v_adres;
-    EXCEPTION
-        WHEN NO_DATA_FOUND THEN
-            RETURN 'Nie znaleziono';
-    END pobierz_adres_budynku;
-    
-    FUNCTION statystyki_budynku(p_id_budynku NUMBER) RETURN VARCHAR2 IS
-        v_mieszkan NUMBER;
-        v_czlonkow NUMBER;
-        v_napraw NUMBER;
-    BEGIN
-        SELECT COUNT(*) INTO v_mieszkan FROM mieszkanie WHERE id_budynku = p_id_budynku;
-        
-        SELECT COUNT(*) INTO v_czlonkow 
-        FROM czlonek c 
-        JOIN mieszkanie m ON c.id_mieszkania = m.id_mieszkania 
-        WHERE m.id_budynku = p_id_budynku;
-        
-        SELECT COUNT(*) INTO v_napraw 
-        FROM naprawa n 
-        JOIN mieszkanie m ON n.id_mieszkania = m.id_mieszkania 
-        WHERE m.id_budynku = p_id_budynku;
-        
-        RETURN 'Mieszkan: ' || v_mieszkan || ', Czlonkow: ' || v_czlonkow || ', Napraw: ' || v_napraw;
-    EXCEPTION
-        WHEN OTHERS THEN
-            RETURN 'Blad: ' || SQLERRM;
-    END statystyki_budynku;
-    
-END coop_crud_pkg;
-/
-
--- ============================================
--- PORTAL MIESZKANCA (Resident Portal)
--- ============================================
-
--- View: Moje oplaty (dla mieszkanca)
-CREATE OR REPLACE VIEW v_moje_oplaty AS
-SELECT 
-    o.id_oplaty,
-    o.id_mieszkania,
-    u.nazwa_uslugi,
-    o.kwota,
-    o.zuzycie,
-    u.jednostka_miary,
-    o.data_naliczenia,
-    o.status_oplaty
-FROM oplata o
-JOIN uslugi u ON o.id_uslugi = u.id_uslugi;
-
--- Procedura: Zglos naprawe (dla mieszkanca)
+-- LAB 11: Procedura zglaszania naprawy (Portal Mieszkanca)
+-- Uzywana: /resident/repairs POST -> Portal Mieszkanca -> Zglos naprawe
 CREATE OR REPLACE PROCEDURE zglos_naprawe(
     p_id_mieszkania IN NUMBER,
     p_opis IN VARCHAR2,
@@ -742,35 +550,221 @@ EXCEPTION
 END;
 /
 
--- ============================================
--- DANE TESTOWE
--- ============================================
 
+-- ================================================================================
+-- LAB 12: PACKAGES (Pakiety) - specyfikacja + cialo, obsluga wyjatkow
+-- Strona: Panel Administratora -> rozne operacje
+-- ================================================================================
+
+-- LAB 12: Pakiet coop_pkg - podstawowe operacje
+-- Uzywany: /functions/apartment-fees, /functions/worker-repairs, /procedures/increase-fees
+CREATE OR REPLACE PACKAGE coop_pkg IS
+    PROCEDURE zwieksz_oplaty_pkg(p_procent NUMBER DEFAULT 10);
+    FUNCTION policz_naprawy_pracownika(p_id_pracownika NUMBER) RETURN NUMBER;
+    FUNCTION suma_oplat_mieszkania(p_id_mieszkania NUMBER) RETURN NUMBER;
+END coop_pkg;
+/
+
+CREATE OR REPLACE PACKAGE BODY coop_pkg IS
+    -- LAB 12: Procedura w pakiecie
+    PROCEDURE zwieksz_oplaty_pkg(p_procent NUMBER DEFAULT 10) IS
+    BEGIN
+        UPDATE uslugi SET cena_za_jednostke = cena_za_jednostke * (1 + p_procent / 100);
+        COMMIT;
+    END zwieksz_oplaty_pkg;
+
+    -- LAB 12: Funkcja z obsluga wyjatku NO_DATA_FOUND
+    FUNCTION policz_naprawy_pracownika(p_id_pracownika NUMBER) RETURN NUMBER IS
+        v_count NUMBER;
+    BEGIN
+        SELECT COUNT(*) INTO v_count FROM naprawa WHERE id_pracownika = p_id_pracownika;
+        RETURN v_count;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN RETURN 0;
+    END policz_naprawy_pracownika;
+    
+    -- LAB 12: Funkcja agregujaca z NVL
+    FUNCTION suma_oplat_mieszkania(p_id_mieszkania NUMBER) RETURN NUMBER IS
+        v_suma NUMBER;
+    BEGIN
+        SELECT NVL(SUM(kwota), 0) INTO v_suma FROM oplata WHERE id_mieszkania = p_id_mieszkania;
+        RETURN v_suma;
+    END suma_oplat_mieszkania;
+END coop_pkg;
+/
+
+-- LAB 12: Pakiet coop_crud_pkg - operacje CRUD z obsluga wyjatkow
+-- Uzywany: /package/* endpointy -> Panel Admin
+CREATE OR REPLACE PACKAGE coop_crud_pkg IS
+    PROCEDURE insert_budynek(p_adres VARCHAR2, p_liczba_pieter NUMBER, p_rok_budowy NUMBER, p_id OUT NUMBER);
+    PROCEDURE update_budynek(p_id NUMBER, p_adres VARCHAR2, p_liczba_pieter NUMBER);
+    PROCEDURE delete_budynek(p_id NUMBER, p_deleted OUT NUMBER);
+    FUNCTION pobierz_nazwisko_czlonka(p_id NUMBER) RETURN VARCHAR2;
+    FUNCTION pobierz_adres_budynku(p_id NUMBER) RETURN VARCHAR2;
+    FUNCTION statystyki_budynku(p_id_budynku NUMBER) RETURN VARCHAR2;
+END coop_crud_pkg;
+/
+
+CREATE OR REPLACE PACKAGE BODY coop_crud_pkg IS
+    -- LAB 12: INSERT z obsluga DUP_VAL_ON_INDEX
+    PROCEDURE insert_budynek(p_adres VARCHAR2, p_liczba_pieter NUMBER, p_rok_budowy NUMBER, p_id OUT NUMBER) IS
+    BEGIN
+        INSERT INTO budynek (adres, liczba_pieter, rok_budowy)
+        VALUES (p_adres, p_liczba_pieter, p_rok_budowy)
+        RETURNING id_budynku INTO p_id;
+        COMMIT;
+    EXCEPTION
+        WHEN DUP_VAL_ON_INDEX THEN
+            p_id := -1;
+            RAISE_APPLICATION_ERROR(-20010, 'Budynek o tym adresie juz istnieje');
+    END insert_budynek;
+    
+    -- LAB 12: UPDATE z walidacja
+    PROCEDURE update_budynek(p_id NUMBER, p_adres VARCHAR2, p_liczba_pieter NUMBER) IS
+    BEGIN
+        UPDATE budynek SET adres = p_adres, liczba_pieter = p_liczba_pieter WHERE id_budynku = p_id;
+        IF SQL%ROWCOUNT = 0 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'Nie znaleziono budynku o ID: ' || p_id);
+        END IF;
+        COMMIT;
+    END update_budynek;
+    
+    -- LAB 12: DELETE z ROLLBACK
+    PROCEDURE delete_budynek(p_id NUMBER, p_deleted OUT NUMBER) IS
+    BEGIN
+        DELETE FROM budynek WHERE id_budynku = p_id;
+        p_deleted := SQL%ROWCOUNT;
+        COMMIT;
+    EXCEPTION
+        WHEN OTHERS THEN p_deleted := 0; ROLLBACK;
+    END delete_budynek;
+    
+    -- LAB 12: Funkcja z NO_DATA_FOUND i TOO_MANY_ROWS
+    FUNCTION pobierz_nazwisko_czlonka(p_id NUMBER) RETURN VARCHAR2 IS
+        v_nazwisko czlonek.nazwisko%TYPE;
+    BEGIN
+        SELECT nazwisko INTO v_nazwisko FROM czlonek WHERE id_czlonka = p_id;
+        RETURN v_nazwisko;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN RETURN 'Nie znaleziono';
+        WHEN TOO_MANY_ROWS THEN RETURN 'Wiele wynikow';
+    END pobierz_nazwisko_czlonka;
+    
+    -- LAB 12: Funkcja z NO_DATA_FOUND
+    FUNCTION pobierz_adres_budynku(p_id NUMBER) RETURN VARCHAR2 IS
+        v_adres budynek.adres%TYPE;
+    BEGIN
+        SELECT adres INTO v_adres FROM budynek WHERE id_budynku = p_id;
+        RETURN v_adres;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN RETURN 'Nie znaleziono';
+    END pobierz_adres_budynku;
+    
+    -- LAB 12: Funkcja ze statystykami (wiele zapytan)
+    FUNCTION statystyki_budynku(p_id_budynku NUMBER) RETURN VARCHAR2 IS
+        v_mieszkan NUMBER;
+        v_czlonkow NUMBER;
+        v_napraw NUMBER;
+    BEGIN
+        SELECT COUNT(*) INTO v_mieszkan FROM mieszkanie WHERE id_budynku = p_id_budynku;
+        SELECT COUNT(*) INTO v_czlonkow FROM czlonek c JOIN mieszkanie m ON c.id_mieszkania = m.id_mieszkania WHERE m.id_budynku = p_id_budynku;
+        SELECT COUNT(*) INTO v_napraw FROM naprawa n JOIN mieszkanie m ON n.id_mieszkania = m.id_mieszkania WHERE m.id_budynku = p_id_budynku;
+        RETURN 'Mieszkan: ' || v_mieszkan || ', Czlonkow: ' || v_czlonkow || ', Napraw: ' || v_napraw;
+    EXCEPTION
+        WHEN OTHERS THEN RETURN 'Blad: ' || SQLERRM;
+    END statystyki_budynku;
+END coop_crud_pkg;
+/
+
+
+-- ================================================================================
+-- LAB 13: TRIGGERS (Wyzwalacze) i Dynamic SQL (EXECUTE IMMEDIATE)
+-- Strona: Panel Administratora -> Narzedzia -> Logi Audytu
+-- ================================================================================
+
+-- LAB 13: Trigger audytu - loguje INSERT/UPDATE/DELETE na tabeli czlonek
+-- Wyniki widoczne: /system/audit-logs -> Panel Admin -> Narzedzia -> Logi audytu
+CREATE OR REPLACE TRIGGER trg_audit_czlonek
+AFTER INSERT OR UPDATE OR DELETE ON czlonek
+FOR EACH ROW
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO log_zmian_czlonka (id_czlonka, operacja, nowe_dane)
+        VALUES (:NEW.id_czlonka, 'INSERT', :NEW.imie || ' ' || :NEW.nazwisko);
+    ELSIF UPDATING THEN
+        INSERT INTO log_zmian_czlonka (id_czlonka, operacja, stare_dane, nowe_dane)
+        VALUES (:OLD.id_czlonka, 'UPDATE', :OLD.imie || ' ' || :OLD.nazwisko, :NEW.imie || ' ' || :NEW.nazwisko);
+    ELSIF DELETING THEN
+        INSERT INTO log_zmian_czlonka (id_czlonka, operacja, stare_dane)
+        VALUES (:OLD.id_czlonka, 'DELETE', :OLD.imie || ' ' || :OLD.nazwisko);
+    END IF;
+END;
+/
+
+-- LAB 13: Trigger walidacji - sprawdza czy kwota oplaty >= 0
+-- Dziala automatycznie przy INSERT/UPDATE na tabeli oplata
+CREATE OR REPLACE TRIGGER trg_walidacja_oplaty
+BEFORE INSERT OR UPDATE OF kwota ON oplata
+FOR EACH ROW
+BEGIN
+    IF :NEW.kwota < 0 THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Kwota oplaty nie moze byc ujemna');
+    END IF;
+END;
+/
+
+-- LAB 13: Funkcja z Dynamic SQL (EXECUTE IMMEDIATE)
+-- Uzywana: /functions/count-records/{table} -> Panel Admin -> Narzedzia -> Statystyki
+CREATE OR REPLACE FUNCTION policz_rekordy(p_nazwa_tabeli VARCHAR2) 
+RETURN NUMBER AS
+    v_sql VARCHAR2(200);
+    v_wynik NUMBER;
+BEGIN
+    v_sql := 'SELECT COUNT(*) FROM ' || p_nazwa_tabeli;
+    EXECUTE IMMEDIATE v_sql INTO v_wynik;
+    RETURN v_wynik;
+EXCEPTION
+    WHEN OTHERS THEN RETURN -1;
+END;
+/
+
+
+-- ================================================================================
+-- DANE TESTOWE (LAB 7: INSERT)
+-- ================================================================================
+
+-- Uzytkownicy (dla logowania)
 INSERT INTO uzytkownicy (login, haslo) VALUES ('admin', 'admin123');
 
+-- Budynki
 INSERT INTO budynek (adres, liczba_pieter, rok_budowy, liczba_mieszkan) VALUES ('ul. Kwiatowa 15', 5, 2005, 20);
 INSERT INTO budynek (adres, liczba_pieter, rok_budowy, liczba_mieszkan) VALUES ('ul. Sloneczna 8', 4, 2010, 16);
 INSERT INTO budynek (adres, liczba_pieter, rok_budowy, liczba_mieszkan) VALUES ('ul. Parkowa 22', 6, 2015, 24);
 
+-- Mieszkania
 INSERT INTO mieszkanie (id_budynku, numer, metraz, liczba_pokoi) VALUES (1, '1A', 45.5, 2);
 INSERT INTO mieszkanie (id_budynku, numer, metraz, liczba_pokoi) VALUES (1, '2B', 65.0, 3);
 INSERT INTO mieszkanie (id_budynku, numer, metraz, liczba_pokoi) VALUES (2, '3C', 55.0, 2);
 INSERT INTO mieszkanie (id_budynku, numer, metraz, liczba_pokoi) VALUES (3, '4D', 80.0, 4);
 
+-- Czlonkowie
 INSERT INTO czlonek (id_mieszkania, imie, nazwisko, pesel, telefon, email) VALUES (1, 'Jan', 'Kowalski', '85010112345', '501123456', 'jan.kowalski@email.pl');
 INSERT INTO czlonek (id_mieszkania, imie, nazwisko, pesel, telefon, email) VALUES (2, 'Anna', 'Nowak', '90020298765', '502234567', 'anna.nowak@email.pl');
 INSERT INTO czlonek (id_mieszkania, imie, nazwisko, pesel, telefon, email) VALUES (3, 'Piotr', 'Wisniewski', '78030367890', '503345678', 'piotr.wisniewski@email.pl');
 INSERT INTO czlonek (id_mieszkania, imie, nazwisko, pesel, telefon, email) VALUES (4, 'Maria', 'Dabrowska', '82040445678', '504456789', 'maria.dabrowska@email.pl');
 
+-- Pracownicy
 INSERT INTO pracownik (imie, nazwisko, stanowisko, telefon, email) VALUES ('Tomasz', 'Maj', 'Konserwator', '600111222', 'tomasz.maj@spoldzielnia.pl');
 INSERT INTO pracownik (imie, nazwisko, stanowisko, telefon, email) VALUES ('Ewa', 'Lewandowska', 'Administrator', '600222333', 'ewa.lewandowska@spoldzielnia.pl');
 
+-- Uslugi
 INSERT INTO uslugi (nazwa_uslugi, cena_za_jednostke, jednostka_miary) VALUES ('Woda zimna', 5.50, 'm3');
-INSERT INTO uslugi (nazwa_uslugi, cena_za_jednostke, jednostka_miary) VALUES ('Woda ciepła', 12.80, 'm3');
+INSERT INTO uslugi (nazwa_uslugi, cena_za_jednostke, jednostka_miary) VALUES ('Woda ciepla', 12.80, 'm3');
 INSERT INTO uslugi (nazwa_uslugi, cena_za_jednostke, jednostka_miary) VALUES ('Ogrzewanie', 4.20, 'm2');
-INSERT INTO uslugi (nazwa_uslugi, cena_za_jednostke, jednostka_miary) VALUES ('Wywóz śmieci', 25.00, 'szt');
+INSERT INTO uslugi (nazwa_uslugi, cena_za_jednostke, jednostka_miary) VALUES ('Wywoz smieci', 25.00, 'szt');
 INSERT INTO uslugi (nazwa_uslugi, cena_za_jednostke, jednostka_miary) VALUES ('Czynsz', 8.50, 'm2');
 
+-- Oplaty
 INSERT INTO oplata (id_mieszkania, id_uslugi, kwota, zuzycie, status_oplaty) VALUES (1, 1, 55.00, 10, 'oplacone');
 INSERT INTO oplata (id_mieszkania, id_uslugi, kwota, zuzycie, status_oplaty) VALUES (1, 3, 191.10, 45.5, 'nieoplacone');
 INSERT INTO oplata (id_mieszkania, id_uslugi, kwota, zuzycie, status_oplaty) VALUES (2, 1, 66.00, 12, 'oplacone');
@@ -778,25 +772,27 @@ INSERT INTO oplata (id_mieszkania, id_uslugi, kwota, zuzycie, status_oplaty) VAL
 INSERT INTO oplata (id_mieszkania, id_uslugi, kwota, zuzycie, status_oplaty) VALUES (3, 2, 128.00, 10, 'oplacone');
 INSERT INTO oplata (id_mieszkania, id_uslugi, kwota, zuzycie, status_oplaty) VALUES (4, 4, 25.00, 1, 'nieoplacone');
 
+-- Naprawy
 INSERT INTO naprawa (id_mieszkania, id_pracownika, opis, status) VALUES (1, 1, 'Naprawa cieknacego kranu w lazience', 'wykonana');
 INSERT INTO naprawa (id_mieszkania, id_pracownika, opis, status) VALUES (2, 1, 'Wymiana zamka w drzwiach wejsciowych', 'w trakcie');
 INSERT INTO naprawa (id_mieszkania, opis, status) VALUES (3, 'Awaria ogrzewania - brak cieplej wody', 'zgloszona');
 
--- Dane dla nowych tabel
+-- Spotkania
 INSERT INTO spotkanie_mieszkancow (temat, miejsce, data_spotkania) VALUES ('Zebranie roczne', 'Sala konferencyjna', SYSDATE - 30);
 INSERT INTO spotkanie_mieszkancow (temat, miejsce, data_spotkania) VALUES ('Sprawy biezace', 'Portiernia', SYSDATE - 7);
 INSERT INTO spotkanie_mieszkancow (temat, miejsce, data_spotkania) VALUES ('Plan remontow 2026', 'Sala konferencyjna', SYSDATE + 14);
 
+-- Umowy
 INSERT INTO umowa (id_mieszkania, id_czlonka, data_zawarcia, data_wygasniecia, typ_umowy) VALUES (1, 1, DATE '2023-01-15', DATE '2026-01-15', 'najem');
 INSERT INTO umowa (id_mieszkania, id_czlonka, data_zawarcia, data_wygasniecia, typ_umowy) VALUES (2, 2, DATE '2022-06-01', DATE '2025-06-01', 'wlasnosc');
 INSERT INTO umowa (id_mieszkania, id_czlonka, data_zawarcia, data_wygasniecia, typ_umowy) VALUES (3, 3, DATE '2024-03-01', DATE '2027-03-01', 'najem');
 INSERT INTO umowa (id_mieszkania, id_czlonka, data_zawarcia, data_wygasniecia, typ_umowy) VALUES (4, 4, DATE '2021-09-01', NULL, 'wlasnosc');
 
--- Konta spółdzielni (rachunki za usługi)
+-- Konta spoldzielni
 INSERT INTO konto_spoldzielni (nazwa_konta, numer_konta, id_uslugi, saldo) VALUES ('Konto woda zimna', 'PL61109010140000071219812874', 1, 15420.00);
-INSERT INTO konto_spoldzielni (nazwa_konta, numer_konta, id_uslugi, saldo) VALUES ('Konto woda ciepła', 'PL49102028922276300500000000', 2, 8750.50);
+INSERT INTO konto_spoldzielni (nazwa_konta, numer_konta, id_uslugi, saldo) VALUES ('Konto woda ciepla', 'PL49102028922276300500000000', 2, 8750.50);
 INSERT INTO konto_spoldzielni (nazwa_konta, numer_konta, id_uslugi, saldo) VALUES ('Konto ogrzewanie', 'PL32105010251000009080000000', 3, 42300.00);
-INSERT INTO konto_spoldzielni (nazwa_konta, numer_konta, id_uslugi, saldo) VALUES ('Konto wywóz śmieci', 'PL83101010230000261395100000', 4, 3200.00);
+INSERT INTO konto_spoldzielni (nazwa_konta, numer_konta, id_uslugi, saldo) VALUES ('Konto wywoz smieci', 'PL83101010230000261395100000', 4, 3200.00);
 INSERT INTO konto_spoldzielni (nazwa_konta, numer_konta, id_uslugi, saldo) VALUES ('Konto czynszowe', 'PL27114020040000300201355387', 5, 125000.00);
 
 COMMIT;

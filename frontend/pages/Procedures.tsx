@@ -91,6 +91,10 @@ export const Procedures: React.FC = () => {
   const [spotkanieForm, setSpotkanieForm] = useState({ temat: '', miejsce: '', data: '' });
   const [kontaForm, setKontaForm] = useState({ id_konta: 0, nowe_saldo: '0' });
   const [budynekForm, setBudynekForm] = useState({ adres: '', liczba_pieter: '1', rok_budowy: String(new Date().getFullYear()) });
+  // LAB 11: Форма для функції dodaj_oplate_fn - автоматичне обчислення kwota = cena * zuzycie
+  // Strona: Panel Administratora -> Narzedzia -> Dodawanie -> Nowa oplata
+  const [oplataForm, setOplataForm] = useState({ id_mieszkania: 0, id_uslugi: 0, zuzycie: '' });
+  const [uslugi, setUslugi] = useState<Array<{ id_uslugi: number; nazwa_uslugi: string; cena_za_jednostke: number; jednostka_miary: string }>>([]);
 
   const [dynamicTable, setDynamicTable] = useState('budynek');
   const [dynamicCount, setDynamicCount] = useState<number | null>(null);
@@ -115,23 +119,27 @@ export const Procedures: React.FC = () => {
 
   const loadData = useCallback(async () => {
     try {
-      const [m, p, b, k] = await Promise.all([
+      const [m, p, b, k, u] = await Promise.all([
         db.getTableData<Mieszkanie>('mieszkanie'),
         db.getTableData<{ id_pracownika: number; imie: string; nazwisko: string }>('pracownik'),
         db.getTableData<Budynek>('budynek'),
         db.getTableData<{ id_konta: number; nazwa_konta: string; numer_konta: string; saldo: number }>('konto_spoldzielni'),
+        db.getTableData<{ id_uslugi: number; nazwa_uslugi: string; cena_za_jednostke: number; jednostka_miary: string }>('uslugi'),
       ]);
       setMieszkania(m);
       setPracownicy(p);
       setBudynki(b);
       setKontoBank(k);
+      setUslugi(u);
       if (m.length > 0) {
         setSelectedMieszkanieForPkg(m[0].id_mieszkania);
         setCzlonekForm(prev => ({ ...prev, id_mieszkania: m[0].id_mieszkania }));
+        setOplataForm(prev => ({ ...prev, id_mieszkania: m[0].id_mieszkania }));
       }
       if (p.length > 0) setSelectedPracownikForPkg(p[0].id_pracownika);
       if (b.length > 0) setSelectedBudynekForPkg(b[0].id_budynku);
       if (k.length > 0) setKontaForm(prev => ({ ...prev, id_konta: k[0].id_konta }));
+      if (u.length > 0) setOplataForm(prev => ({ ...prev, id_uslugi: u[0].id_uslugi }));
     } catch (e) {
       console.error('Error loading data:', e);
     }
@@ -281,6 +289,31 @@ export const Procedures: React.FC = () => {
     }
   };
 
+  // LAB 11: Handler dla funkcji dodaj_oplate_fn (Funkcja INSERT z automatycznym obliczeniem kwoty)
+  // Funkcja: dodaj_oplate_fn(p_id_mieszkania, p_id_uslugi, p_zuzycie) RETURN NUMBER
+  // Oblicza: kwota = cena_za_jednostke * zuzycie
+  // Strona: Panel Administratora -> Narzedzia -> Dodawanie -> Nowa oplata
+  const handleDodajOplate = async () => {
+    if (!oplataForm.id_mieszkania || !oplataForm.id_uslugi || !oplataForm.zuzycie) {
+      showNotification('Uzupełnij mieszkanie, usługę i zużycie', 'error');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const message = await db.callProcedureAddFee(
+        oplataForm.id_mieszkania,
+        oplataForm.id_uslugi,
+        Number(oplataForm.zuzycie)
+      );
+      showNotification(message, 'success');
+      setOplataForm({ ...oplataForm, zuzycie: '' });
+    } catch {
+      showNotification('Błąd dodawania opłaty', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const getOperationBadge = (op: string) => {
     if (op === 'INSERT') return 'bg-green-100 dark:bg-green-900/30 text-green-600';
     if (op === 'UPDATE') return 'bg-amber-100 dark:bg-amber-900/30 text-amber-600';
@@ -405,7 +438,10 @@ export const Procedures: React.FC = () => {
             <div className="space-y-2">
               <select value={czlonekForm.id_mieszkania} onChange={(e) => setCzlonekForm({ ...czlonekForm, id_mieszkania: Number(e.target.value) })}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white">
-                {mieszkania.map(m => (<option key={m.id_mieszkania} value={m.id_mieszkania}>Mieszkanie {m.numer}</option>))}
+                {mieszkania.map(m => {
+                  const budynek = budynki.find(b => b.id_budynku === m.id_budynku);
+                  return (<option key={m.id_mieszkania} value={m.id_mieszkania}>{budynek?.adres || 'Budynek'}, {m.numer}</option>);
+                })}
               </select>
               <div className="grid grid-cols-2 gap-2">
                 <input type="text" placeholder="Imię" value={czlonekForm.imie} onChange={(e) => setCzlonekForm({ ...czlonekForm, imie: e.target.value })}
@@ -443,12 +479,13 @@ export const Procedures: React.FC = () => {
           </div>
 
           {/* Nowy budynek */}
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700 flex flex-col">
             <div className="flex items-center gap-2 mb-3">
               <Building size={16} className="text-slate-600 dark:text-slate-400" />
               <span className="font-medium text-slate-800 dark:text-white text-sm">Nowy budynek</span>
             </div>
-            <div className="space-y-2">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">Dodaj nowy budynek do systemu</p>
+            <div className="space-y-2 flex-1">
               <input type="text" placeholder="Adres budynku" value={budynekForm.adres} onChange={(e) => setBudynekForm({ ...budynekForm, adres: e.target.value })}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white" />
               <div className="grid grid-cols-2 gap-2">
@@ -459,8 +496,41 @@ export const Procedures: React.FC = () => {
               </div>
             </div>
             <button onClick={handleDodajBudynek} disabled={isLoading}
-              className="w-full mt-3 py-2 bg-slate-900 dark:bg-blue-600 text-white dark:text-white text-sm font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-blue-500 disabled:opacity-50 flex items-center justify-center gap-2">
+              className="w-full mt-4 py-2 bg-slate-900 dark:bg-blue-600 text-white dark:text-white text-sm font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-blue-500 disabled:opacity-50 flex items-center justify-center gap-2">
               <Building size={14} /> Dodaj budynek
+            </button>
+          </div>
+
+          {/* LAB 11: Nowa opłata - Funkcja dodaj_oplate_fn
+              Automatycznie oblicza kwotę: kwota = cena_za_jednostke * zuzycie
+              Wywołuje funkcję PL/SQL z 3 parametrami i zwraca obliczoną kwotę
+              Strona: Panel Administratora -> Narzędzia -> Dodawanie -> Nowa opłata */}
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700 flex flex-col">
+            <div className="flex items-center gap-2 mb-3">
+              <CreditCard size={16} className="text-slate-600 dark:text-slate-400" />
+              <span className="font-medium text-slate-800 dark:text-white text-sm">Nowa opłata</span>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">Nalicz opłatę za zużycie usługi</p>
+            <div className="space-y-2 flex-1">
+              <select value={oplataForm.id_mieszkania} onChange={(e) => setOplataForm({ ...oplataForm, id_mieszkania: Number(e.target.value) })}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white">
+                {mieszkania.map(m => {
+                  const budynek = budynki.find(b => b.id_budynku === m.id_budynku);
+                  return (<option key={m.id_mieszkania} value={m.id_mieszkania}>{budynek?.adres || 'Budynek'}, {m.numer}</option>);
+                })}
+              </select>
+              <div className="grid grid-cols-2 gap-2">
+                <select value={oplataForm.id_uslugi} onChange={(e) => setOplataForm({ ...oplataForm, id_uslugi: Number(e.target.value) })}
+                  className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white">
+                  {uslugi.map(u => (<option key={u.id_uslugi} value={u.id_uslugi}>{u.nazwa_uslugi}</option>))}
+                </select>
+                <input type="number" step="0.01" placeholder="Zużycie" value={oplataForm.zuzycie} onChange={(e) => setOplataForm({ ...oplataForm, zuzycie: e.target.value })}
+                  className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-900 dark:text-white" />
+              </div>
+            </div>
+            <button onClick={handleDodajOplate} disabled={isLoading}
+              className="w-full mt-4 py-2 bg-slate-900 dark:bg-blue-600 text-white dark:text-white text-sm font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-blue-500 disabled:opacity-50 flex items-center justify-center gap-2">
+              <CreditCard size={14} /> Dodaj opłatę
             </button>
           </div>
         </div>

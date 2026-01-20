@@ -9,6 +9,7 @@ services:
       - "5500:5500"
     environment:
       - ORACLE_PWD=oracle
+      - TZ=Europe/Warsaw
     volumes:
       - oracle-data:/opt/oracle/oradata
       - ./INIT_DB.sql:/opt/oracle/scripts/startup/init.sql
@@ -33,6 +34,7 @@ services:
       - DB_USER=system
       - DB_PASSWORD=oracle
       - DB_DSN=db:1521/XEPDB1
+      - TZ=Europe/Warsaw
     restart: always
 
   frontend:
