@@ -1,210 +1,130 @@
-# CoopManager
+# CoopManager 🏢
 
-**Housing Cooperative Management System** — a full-featured web application for administering buildings, residents, payments, and repairs.
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
+![Oracle](https://img.shields.io/badge/Oracle-F80000?style=for-the-badge&logo=oracle&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
-**Live Demo:** [mariukha.pl/bazy/](https://mariukha.pl/bazy/)  
-**Credentials:** `admin` / `admin123`
+**CoopManager** is a comprehensive Housing Cooperative Management System designed to streamline the administration of buildings, residents, utilities, and payments. It features a robust **Admin Panel** for management and a **Resident Portal** for transparency.
 
-## Architecture
+This project was developed as a final assignment, integrating advanced database concepts including **PL/SQL Procedures, Functions, Triggers, Views**, and **Dynamic SQL**.
 
+---
+
+## 🚀 Live Demo & Access
+
+- **URL:** [mariukha.pl/bazy/](https://mariukha.pl/bazy/)
+- **Admin Credentials:**
+  - Login: `admin`
+  - Password: `admin123`
+
+---
+
+## 🏗️ Architecture
+
+The application follows a modern 3-tier architecture:
+
+```mermaid
+graph LR
+    A[Frontend] -- REST API --> B[Backend]
+    B -- cx_Oracle --> C[(Oracle Database)]
+    
+    subgraph Containerized with Docker
+    A(React + Vite + TS)
+    B(FastAPI + Python)
+    C(Oracle XE 21c)
+    end
 ```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│    Frontend     │────▶│     Backend     │────▶│  Oracle Database│
-│   React + TS    │     │     FastAPI     │     │     XEPDB1      │
-│   Port: 3000    │     │   Port: 8000    │     │   Port: 1521    │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-```
 
-## Features
+---
 
-### Admin Panel
-- **Dashboard** — statistics overview with dynamic record counting
-- **Buildings** — management of buildings and infrastructure
-- **Apartments** — housing stock management
-- **Members** — residents database with audit triggers
-- **Employees** — staff records
-- **Repairs** — repair request tracking
-- **Payments** — payment control and billing
-- **Services** — tariffs and utility services
-- **Reports** — financial analytics with views (Lab 9)
-- **PL/SQL Procedures** — execution of database procedures and package functions
+## ✨ Key Features
 
-### Resident Portal
-- View personal payment history
-- Track status of repair requests
-- View apartment and contract information
+### 🔧 **Administrator Panel**
+- **Dashboard**: Real-time statistics including total revenue, member count, and arrears monitoring.
+- **Entity Management**: CRUD operations for Buildings, Apartments, Members, and Employees.
+- **Advanced Tools**:
+  - **Fee Calculation**: Automated fee addition using PL/SQL function `dodaj_oplate_fn` (auto-calculates based on usage).
+  - **Global Updates**: Batch price increases via `zwieksz_oplaty` procedure.
+  - **Audit Logs**: Full history of changes (INSERT/UPDATE/DELETE) tracked by `trg_audit_czlonek`.
+- **Reports**: Financial analytics and status reports powered by SQL Views (Lab 9 & 10).
 
-## Quick Start
+### 👤 **Resident Portal**
+- **Personal Dashboard**: View assigned apartment details.
+- **Payment History**: Track paid and unpaid bills.
+- **Repairs**: Submit and monitor repair requests.
+- **Community**: View upcoming meetings and announcements.
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology | Description |
+|-------|------------|-------------|
+| **Frontend** | React 18, TypeScript | Built with **Vite**, styled with **TailwindCSS** & **Lucide Icons**. |
+| **Backend** | Python 3.11, FastAPI | High-performance REST API with **Pydantic** validation. |
+| **Database** | Oracle Database 21c XE | Enterprise-grade DB with complex PL/SQL logic. |
+| **DevOps** | Docker Compose | Orchestration for all 3 services + volumes. |
+
+---
+
+## 🧪 Laboratory Requirements Implementation
+
+This project implements requirements from Labs 7 through 13:
+
+| Lab | Feature / Concept | Implementation in Project |
+|:---:|-------------------|---------------------------|
+| **7** | **Basic CRUD** | Full CRUD for 10+ tables (Residents, Buildings, etc.) |
+| **8** | **Aggregation** | Dashboard statistics (SUM, COUNT, GROUP BY) |
+| **9** | **Views** | `v_mieszkania_info` (Simple), `v_oplaty_summary` (Complex), `v_naprawy_status` |
+| **10** | **Advanced Joins** | Reports using LEFT, RIGHT, FULL OUTER, CROSS, and SELF JOINs |
+| **11** | **Procedures & Functions** | `zwieksz_oplaty` (Procedure), `dodaj_oplate_fn` (Function), `pobierz_czlonkow` (Cursor) |
+| **12** | **Packages** | `coop_pkg` containing business logic for calculations |
+| **13** | **Triggers & Dynamic SQL** | `trg_audit_czlonek` (Audit Log), `policz_rekordy` (Dynamic SQL via `EXECUTE IMMEDIATE`) |
+
+---
+
+## 📦 Installation & Setup
 
 ### Prerequisites
-- **Docker** and **Docker Compose** (required)
-- 8GB+ RAM recommended (Oracle XE needs ~2GB)
-- ~10GB disk space
+- Docker & Docker Compose installed
+- Git
 
-### Run with Docker
+### Quick Start
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/mariukha/CoopManager.git
+    cd CoopManager
+    ```
 
-```bash
-# 1. Clone the repository
-git clone <repo-url>
-cd Klient
+2.  **Launch with Docker:**
+    ```bash
+    docker-compose up -d
+    ```
+    > **Note:** The first run may take **3-5 minutes** as the Oracle Database initializes.
 
-# 2. Start all services (database + backend + frontend)
-docker compose up -d
+3.  **Verify Status:**
+    Check if all containers are healthy:
+    ```bash
+    docker-compose ps
+    ```
 
-# 3. Wait for Oracle database initialization (~2-3 minutes on first run)
-docker compose logs -f oracle-db
+4.  **Access the App:**
+    - Frontend: [http://localhost:3000](http://localhost:3000)
+    - Backend API: [http://localhost:8000/docs](http://localhost:8000/docs)
 
-# 4. Check if all containers are running
-docker compose ps
-```
+### Troubleshooting
+- **Timezone Issues:** The application is configured for `Europe/Warsaw` (CET). If logs show incorrect times, ensure your Docker host time is correct.
+- **Database Connection:** If the backend fails to connect, ensure the `oracle-xe-prod` container is `healthy` before the backend starts (handled by `depends_on`).
 
-**First startup takes 2-3 minutes** because Oracle XE needs to initialize. The `INIT_DB.sql` script runs automatically and creates:
-- All tables (budynek, mieszkanie, czlonek, pracownik, naprawa, uslugi, oplata, umowa, etc.)
-- Sample data
-- Views (v_oplaty_summary, v_naprawy_status, v_mieszkania_info)
-- Procedures and Functions (zwieksz_oplaty, dodaj_oplate_fn, pobierz_czlonkow_budynku)
-- Package coop_pkg with suma_oplat_mieszkania and policz_naprawy_pracownika
-- Triggers (trg_audit_czlonek)
+---
 
-### Access Points
+## 👥 Authors
+- **Maksym Mariukha**
+- **Reznik**
+- **Labunskyi**
 
-| Service | URL |
-|---------|-----|
-| **Frontend** | http://localhost:3000 |
-| **Backend API** | http://localhost:8000 |
-| **API Docs (Swagger)** | http://localhost:8000/docs |
+---
 
-### Verify Database Initialization
-
-```bash
-# Check Oracle logs for "INIT_DB.sql executed"
-docker compose logs oracle-db | grep -i "init"
-
-# Or connect to Oracle and verify tables
-docker exec -it oracle-xe-prod sqlplus system/oracle@XEPDB1
-SQL> SELECT table_name FROM user_tables;
-```
-
-### Common Commands
-
-```bash
-# Stop all services
-docker compose down
-
-# Restart with fresh database (removes all data)
-docker compose down -v
-docker compose up -d
-
-# Rebuild frontend after code changes
-docker compose build --no-cache frontend
-docker compose up -d frontend
-
-# Rebuild backend after code changes
-docker compose build --no-cache backend
-docker compose up -d backend
-
-# View logs
-docker compose logs -f backend
-docker compose logs -f frontend
-```
-
-## Local Development (without Docker)
-
-### Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-# Runs on http://localhost:5173
-```
-
-### Backend
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-```
-
-> **Note:** For local development, you still need Oracle running (via Docker or installed locally).
-
-## Project Structure
-
-```
-Klient/
-├── frontend/                 # React application (Vite + TypeScript)
-│   ├── components/           # Reusable UI components
-│   ├── pages/                # Dashboard, Reports, Procedures
-│   ├── hooks/                # useAuth, useTheme, useNotification
-│   ├── services/             # API client (Axios)
-│   ├── config/               # Table configs, constants
-│   └── types/                # TypeScript interfaces
-├── backend/                  # FastAPI REST API
-│   ├── main.py               # All endpoints
-│   ├── db.py                 # Oracle connection (oracledb)
-│   └── requirements.txt      # Python dependencies
-├── init-db/                  # Oracle initialization scripts
-├── docker-compose.yml        # Docker services configuration
-├── INIT_DB.sql               # Database schema + sample data + PL/SQL
-└── README.md                 # This file
-```
-
-## PL/SQL Features (Labs 7-13)
-
-| Feature | Lab | Description |
-|---------|-----|-------------|
-| `policz_rekordy(table)` | 13 | Dynamic SQL — counts records in any table |
-| `pobierz_czlonkow_budynku(id)` | 11 | Returns CURSOR with building members |
-| `dodaj_oplate_fn(apt, svc, usage)` | 11 | Function to add payment |
-| `zwieksz_oplaty(percent)` | 11 | Procedure to increase service prices |
-| `coop_pkg.suma_oplat_mieszkania(id)` | 12 | Package function — apartment payment sum |
-| `coop_pkg.policz_naprawy_pracownika(id)` | 12 | Package function — worker repairs count |
-| `trg_audit_czlonek` | 13 | Trigger logging INSERT/UPDATE/DELETE |
-| `v_oplaty_summary` | 9 | View — payments by apartment |
-| `v_naprawy_status` | 9 | View — repairs with CASE status |
-
-## System Access
-
-### Administrator
-- **Login:** `admin`
-- **Password:** `admin123`
-
-### Resident
-- Login using **First Name**, **Last Name**, and **Apartment Number**
-- Data from `czlonek` table (e.g., Jan Kowalski, apt 101)
-
-## Tech Stack
-
-| Component | Technology |
-|-----------|-----------|
-| Frontend | React 19, TypeScript, Vite, TailwindCSS |
-| Backend | FastAPI, Python 3.11, oracledb |
-| Database | Oracle XE 21c |
-| Icons | Lucide React |
-| HTTP Client | Axios |
-| Containerization | Docker, Docker Compose |
-
-## Troubleshooting
-
-### "Connection refused" on backend
-Oracle might still be starting. Wait 2-3 minutes and check:
-```bash
-docker compose logs oracle-db | tail -20
-```
-
-### "Table does not exist"
-INIT_DB.sql hasn't run yet. Either wait or manually execute:
-```bash
-docker exec -it oracle-xe-prod sqlplus system/oracle@XEPDB1 @/docker-entrypoint-initdb.d/INIT_DB.sql
-```
-
-### Frontend shows blank page
-Check browser console for errors. Rebuild if needed:
-```bash
-docker compose build --no-cache frontend && docker compose up -d frontend
-```
-
-## License
-
-MIT License — use freely for educational purposes.
+*Project created for Database Systems course at PJATK.*
