@@ -218,6 +218,35 @@ async def login_resident(req: ResidentLoginRequest):
         raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
 
 
+# LAB 8: SELECT z WHERE LIKE - wyszukiwanie tekstowe w tabeli
+# Interfejs: Panel Administratora -> pole wyszukiwania w kazdej zakladce
+@app.get("/data/{table}/search")
+async def search_table_data(table: str, q: str = ""):
+    if table not in VALID_TABLES:
+        raise HTTPException(status_code=400, detail="Nieprawidlowa tabela")
+    if not q or len(q) < 1:
+        return await get_table_data(table)
+    try:
+        with get_cursor() as (cursor, conn):
+            cursor.execute(f"SELECT * FROM {table} WHERE ROWNUM = 1")
+            columns = [col[0].lower() for col in cursor.description]
+            text_columns = []
+            for col in cursor.description:
+                if col[1] in (str, None) or 'VARCHAR' in str(col[1]).upper() or 'CHAR' in str(col[1]).upper():
+                    text_columns.append(col[0])
+            if not text_columns:
+                text_columns = [col[0] for col in cursor.description]
+            like_clauses = " OR ".join([f"UPPER({col}) LIKE UPPER(:search_term)" for col in text_columns])
+            sql = f"SELECT * FROM {table} WHERE {like_clauses}"
+            cursor.execute(sql, {"search_term": f"%{q}%"})
+            columns = [col[0].lower() for col in cursor.description]
+            rows = cursor.fetchall()
+            return [serialize_row(row, columns) for row in rows]
+    except Exception as e:
+        print(f"SEARCH ERROR: {e}")
+        raise HTTPException(status_code=500, detail=translate_oracle_error(str(e)))
+
+
 # LAB 7: SELECT * - pobranie wszystkich rekordow z tabeli
 # Interfejs: Panel Administratora -> kazda zakladka z danymi
 @app.get("/data/{table}")

@@ -3,6 +3,15 @@ import { API_BASE_URL } from '../config/constants';
 import type { DatabaseRecord, LogAudit, SummaryReport } from '../types';
 
 export const db = {
+  // LAB 8: SELECT z WHERE LIKE - wyszukiwanie tekstowe przez baze danych
+  async searchTableData<T = DatabaseRecord>(table: string, query: string): Promise<T[]> {
+    if (!query || query.length < 1) {
+      return this.getTableData<T>(table);
+    }
+    const response = await axios.get<T[]>(`${API_BASE_URL}/data/${table}/search?q=${encodeURIComponent(query)}`);
+    return response.data;
+  },
+
   async getTableData<T = DatabaseRecord>(table: string): Promise<T[]> {
     if (table === 'logi' || table === 'log_zmian_czlonka') {
       const response = await axios.get<T[]>(`${API_BASE_URL}/system/audit-logs`);
@@ -11,6 +20,7 @@ export const db = {
     const response = await axios.get<T[]>(`${API_BASE_URL}/data/${table}`);
     return response.data;
   },
+
 
   async insertRecord(table: string, data: DatabaseRecord): Promise<void> {
     await axios.post(`${API_BASE_URL}/data/${table}`, { data });

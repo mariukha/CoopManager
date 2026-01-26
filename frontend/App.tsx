@@ -49,6 +49,7 @@ const App: React.FC = () => {
   const [tableData, setTableData] = useState<DatabaseRecord[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
   const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
 
@@ -72,8 +73,17 @@ const App: React.FC = () => {
   useEffect(() => {
     setSelectedIds([]);
     setSearchTerm('');
+    setDebouncedSearchTerm('');
     setSortConfig(null);
   }, [currentView]);
+
+  // LAB 8: Debounce dla wyszukiwania przez baze danych
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   useEffect(() => {
     if (isLoggedIn && userRole) {
@@ -89,6 +99,7 @@ const App: React.FC = () => {
     }
   }, [currentView, isLoggedIn]);
 
+  // LAB 8: SELECT z WHERE LIKE - wyszukiwanie przez baze danych
   const loadData = useCallback(async () => {
     const specialViews = ['dashboard', 'system', 'reports', 'join-views'];
     if (specialViews.includes(currentView)) return;
@@ -99,7 +110,12 @@ const App: React.FC = () => {
       let data: DatabaseRecord[];
 
       if (userRole === 'admin') {
-        data = await db.getTableData(`${currentView}?t=${Date.now()}`);
+        // LAB 8: Wyszukiwanie z WHERE LIKE przez baze danych
+        if (debouncedSearchTerm && debouncedSearchTerm.length >= 1) {
+          data = await db.searchTableData(currentView, debouncedSearchTerm);
+        } else {
+          data = await db.getTableData(`${currentView}?t=${Date.now()}`);
+        }
       } else {
         if (!userData?.apt_id || userData.apt_id <= 0) {
           setIsLoading(false);
@@ -114,11 +130,11 @@ const App: React.FC = () => {
       setTableData(data || []);
     } catch (error) {
       console.error('loadData error:', { currentView, userRole, userData, error });
-      showNotification('Błąd ładowania danych.', 'error');
+      showNotification('Blad ladowania danych.', 'error');
     } finally {
       setIsLoading(false);
     }
-  }, [currentView, userRole, userData, showNotification]);
+  }, [currentView, userRole, userData, debouncedSearchTerm, showNotification]);
 
   const loadDropdownData = useCallback(async () => {
     if (userRole !== 'admin') return;
@@ -153,15 +169,9 @@ const App: React.FC = () => {
     loadDropdownData();
   }, [isLoggedIn, loadData, loadDropdownData]);
 
+  // Przetwarzanie danych - sortowanie (filtrowanie jest teraz przez baze danych)
   const processedData = useMemo(() => {
     let result = [...tableData];
-
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(row =>
-        Object.values(row).some(val => String(val).toLowerCase().includes(term))
-      );
-    }
 
     if (sortConfig) {
       result.sort((a, b) => {
