@@ -1,0 +1,74 @@
+SET SERVEROUTPUT ON
+--zad1
+SPOOL wyniki_lab13.txt
+
+--zad2_1 (Tworzenie tabeli logów dla audytu)
+CREATE TABLE log_zmian_czlonka (
+    id_logu NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_czlonka NUMBER,
+    operacja VARCHAR2(20),
+    data_operacji TIMESTAMP,
+    uzytkownik VARCHAR2(50)
+);
+
+--zad2_2 (Wyzwalacz AFTER INSERT na tabeli CZLONEK - Row-level)
+CREATE OR REPLACE TRIGGER trg_audit_czlonek
+AFTER INSERT OR DELETE ON czlonek
+FOR EACH ROW
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO log_zmian_czlonka (id_czlonka, operacja, data_operacji, uzytkownik)
+        VALUES (:NEW.id_czlonka, 'INSERT', CURRENT_TIMESTAMP, USER);
+    ELSIF DELETING THEN
+        INSERT INTO log_zmian_czlonka (id_czlonka, operacja, data_operacji, uzytkownik)
+        VALUES (:OLD.id_czlonka, 'DELETE', CURRENT_TIMESTAMP, USER);
+    END IF;
+END;
+/
+
+--zad2_3 (Wyzwalacz BEFORE UPDATE na tabeli OPLATA - Walidacja kwoty)
+CREATE OR REPLACE TRIGGER trg_walidacja_oplaty
+BEFORE UPDATE OF kwota ON oplata
+FOR EACH ROW
+BEGIN
+    IF :NEW.kwota <= 0 THEN
+        RAISE_APPLICATION_ERROR(-20005, 'Kwota opłaty musi być większa od zera.');
+    END IF;
+END;
+/
+
+--zad3 (Dynamiczny SQL - Funkcja do pobierania liczby rekordów z dowolnej tabeli)
+CREATE OR REPLACE FUNCTION policz_rekordy(p_nazwa_tabeli VARCHAR2) 
+RETURN NUMBER IS
+    v_sql VARCHAR2(200);
+    v_wynik NUMBER;
+BEGIN
+    v_sql := 'SELECT COUNT(*) FROM ' || p_nazwa_tabeli;
+    EXECUTE IMMEDIATE v_sql INTO v_wynik;
+    RETURN v_wynik;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Błąd: Nie można uzyskać danych z tabeli ' || p_nazwa_tabeli);
+        RETURN -1;
+END;
+/
+
+--zad4 (Testowanie wyzwalaczy i dynamicznego SQL)
+BEGIN
+    -- Test 1: Wyzwalacz audytu (INSERT)
+    INSERT INTO czlonek (id_czlonka, imie, nazwisko, id_mieszkania) VALUES (99, 'Jan', 'Triggeer', 407);
+    
+    -- Test 2: Dynamiczny SQL
+    DBMS_OUTPUT.PUT_LINE('Liczba budynków: ' || policz_rekordy('BUDYNEK'));
+    DBMS_OUTPUT.PUT_LINE('Liczba logów: ' || policz_rekordy('LOG_ZMIAN_CZLONKA'));
+    
+    -- Test 3: Wyzwalacz walidacji (UPDATE - powinien rzucić błąd jeśli kwota <= 0)
+    -- UPDATE oplata SET kwota = -10 WHERE id_oplaty = 11111;
+END;
+/
+
+--zad5
+SELECT * FROM log_zmian_czlonka;
+
+--zad6
+SPOOL OFF

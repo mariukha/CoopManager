@@ -69,6 +69,38 @@ const REPORTS: ReportConfig[] = [
     joinType: '3-TABLE JOIN',
     fetchFn: db.getCzlonkowiePelneInfo,
   },
+  // LAB 9: Widoki zaawansowane
+  {
+    id: 'mv-dashboard',
+    name: 'Statystyki keszowane',
+    description: 'Statystyki dla dashboard',
+    icon: <BarChart3 size={18} />,
+    gradient: 'from-slate-800 to-slate-900 dark:from-slate-700 dark:to-slate-800',
+    joinType: 'VIEW',
+    fetchFn: async () => {
+      const data = await db.getDashboardStats();
+      return [data]; // wrap single row as array
+    },
+  },
+  {
+    id: 'materialized',
+    name: 'Zużycie per budynek',
+    description: 'Statystyki zużycia mediów',
+    icon: <Database size={18} />,
+    gradient: 'from-slate-800 to-slate-900 dark:from-slate-700 dark:to-slate-800',
+    joinType: 'VIEW',
+    fetchFn: db.getZuzyciePerBudynek,
+  },
+  // LAB 9: VIEW z ukrytymi kolumnami
+  {
+    id: 'invisible',
+    name: 'Bezpieczne dane członków',
+    description: 'Dane bez PESEL i telefonu',
+    icon: <Shield size={18} />,
+    gradient: 'from-slate-800 to-slate-900 dark:from-slate-700 dark:to-slate-800',
+    joinType: 'VIEW',
+    fetchFn: db.getCzlonekBezpieczny,
+  },
 ];
 
 export const Procedures: React.FC = () => {
@@ -659,7 +691,7 @@ export const Procedures: React.FC = () => {
       {activeTab === 'reports' && (
         <div className="space-y-4">
           {/* Reports Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {REPORTS.map((report) => (
               <button
                 key={report.id}

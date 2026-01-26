@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
     Users, ArrowRightLeft, Layers, Grid3X3, Link2, RefreshCw, X,
-    Building, TrendingUp, Eye, Database, BarChart3
+    Building, TrendingUp, Eye, Database, BarChart3, Shield, Zap, Activity
 } from 'lucide-react';
 import { db } from '../services/api';
 import type { DatabaseRecord } from '../types';
@@ -14,7 +14,8 @@ interface ReportConfig {
     icon: React.ReactNode;
     gradient: string;
     joinType: string;
-    fetchFn: () => Promise<DatabaseRecord[]>;
+    fetchFn: () => Promise<DatabaseRecord[] | DatabaseRecord>;
+    isSingleRow?: boolean;
 }
 
 const REPORTS: ReportConfig[] = [
@@ -63,6 +64,39 @@ const REPORTS: ReportConfig[] = [
         joinType: '3-TABLE JOIN',
         fetchFn: db.getCzlonkowiePelneInfo,
     },
+    // LAB 9: MATERIALIZED VIEWS
+    {
+        id: 'mv-dashboard',
+        name: 'Statystyki keszowane',
+        description: 'Szybkie statystyki z MV',
+        icon: <Zap size={18} />,
+        gradient: 'from-yellow-500 to-amber-600',
+        joinType: 'MATERIALIZED VIEW',
+        fetchFn: async () => {
+            const data = await db.getDashboardStats();
+            return [data]; // wrap single row as array
+        },
+        isSingleRow: true,
+    },
+    {
+        id: 'mv-zuzycie',
+        name: 'Zużycie wg budynków',
+        description: 'Media per budynek (keszowane)',
+        icon: <Activity size={18} />,
+        gradient: 'from-emerald-500 to-green-600',
+        joinType: 'MATERIALIZED VIEW',
+        fetchFn: db.getZuzyciePerBudynek,
+    },
+    // LAB 9: INVISIBLE VIEW
+    {
+        id: 'invisible',
+        name: 'Bezpieczne dane członków',
+        description: 'Ukryte PESEL i telefon',
+        icon: <Shield size={18} />,
+        gradient: 'from-rose-500 to-pink-600',
+        joinType: 'INVISIBLE VIEW',
+        fetchFn: db.getCzlonekBezpieczny,
+    },
 ];
 
 export const JoinViews: React.FC = () => {
@@ -75,7 +109,7 @@ export const JoinViews: React.FC = () => {
         setSelectedReport(report);
         try {
             const data = await report.fetchFn();
-            setReportData(data);
+            setReportData(Array.isArray(data) ? data : [data]);
         } catch (error) {
             console.error('Error loading report:', error);
             setReportData([]);
@@ -114,7 +148,7 @@ export const JoinViews: React.FC = () => {
                 <div className="flex items-center gap-4 text-xs text-slate-400">
                     <div className="flex items-center gap-1.5">
                         <Database size={14} />
-                        <span>5 raportów</span>
+                        <span>8 raportów</span>
                     </div>
                 </div>
             </div>

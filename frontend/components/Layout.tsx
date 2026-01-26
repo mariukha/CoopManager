@@ -70,6 +70,7 @@ export const NAV_ITEMS: NavItem[] = [
   },
   { id: 'spotkanie_mieszkancow', label: 'Spotkania', icon: CalendarDays, roles: ['admin'] },
   { id: 'reports', label: 'Podsumowania', icon: FileText, roles: ['admin'] },
+  { id: 'join-views', label: 'Widoki Zaawansowane', icon: BarChart3, roles: ['admin'] },
   { id: 'system', label: 'Narzędzia administratora', icon: Database, roles: ['admin'] },
 ];
 

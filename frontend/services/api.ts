@@ -124,6 +124,40 @@ export const db = {
   },
 
   // ============================================
+  // MATERIALIZED VIEWS i INVISIBLE VIEW (Lab 9)
+  // ============================================
+
+  // Materialized View - statystyki dla dashboard (keszowane dane)
+  async getDashboardStats(): Promise<DatabaseRecord> {
+    const response = await axios.get(`${API_BASE_URL}/views/dashboard-stats`);
+    return response.data;
+  },
+
+  // Materialized View - zuzycie mediow per budynek
+  async getZuzyciePerBudynek(): Promise<DatabaseRecord[]> {
+    const response = await axios.get(`${API_BASE_URL}/views/zuzycie-per-budynek`);
+    return response.data;
+  },
+
+  // Odswiezanie widokow zmaterializowanych
+  async refreshMaterializedViews(): Promise<{ message: string }> {
+    const response = await axios.post(`${API_BASE_URL}/views/refresh-mv`);
+    return response.data;
+  },
+
+  // Invisible View - bezpieczne dane czlonka (bez PESEL, telefon)
+  async getCzlonekBezpieczny(): Promise<DatabaseRecord[]> {
+    const response = await axios.get(`${API_BASE_URL}/views/czlonek-bezpieczny`);
+    return response.data;
+  },
+
+  // Jawne pobranie kolumn INVISIBLE z widoku
+  async getCzlonekPelneDane(id: number): Promise<DatabaseRecord> {
+    const response = await axios.get(`${API_BASE_URL}/views/czlonek-pelne-dane/${id}`);
+    return response.data;
+  },
+
+  // ============================================
   // PROCEDURY CRUD (Lab 11)
   // ============================================
 

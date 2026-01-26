@@ -1,0 +1,138 @@
+Politechnika Świętokrzyska
+Wydział Elektrotechniki Automatyki i Informatyki
+Bazy Danych - Laboratorium
+Numer grupy: 2ID13A
+Zespół laboratoryjny: Maksym Mariukha, Daniil Reznik, Artem Labunskyi
+Wyniki prac laboratoryjnych z instrukcji 10
+Data wykonania ćwiczenia: 10.12.2025
+
+Przebieg laboratorium
+
+--Zadanie 1. Rozpocznij rejestracje wyników do pliku wyniki_lab10.txt
+SPOOL wyniki_lab10.txt
+
+--Zadanie 2. Utwórz po jednym zapytaniu z użyciem każdego z wymienionych typów połączeń JOIN w zaprojektowanej na laboratorium 3- 5 bazie danych.
+SELECT c.imie, c.nazwisko, m.numer, m.powierzchnia
+FROM czlonek c
+INNER JOIN mieszkanie m ON c.id_mieszkania = m.id_mieszkania;
+
+SELECT p.nazwisko, p.stanowisko_pracy, n.status
+FROM pracownik p
+LEFT JOIN naprawa n ON p.id_pracownika = n.id_pracownika;
+
+SELECT m.numer
+FROM mieszkanie m
+LEFT JOIN czlonek c ON m.id_mieszkania = c.id_mieszkania
+WHERE c.id_czlonka IS NULL;
+
+SELECT n.id_naprawy, n.status, p.nazwisko
+FROM naprawa n
+RIGHT JOIN pracownik p ON n.id_pracownika = p.id_pracownika;
+
+SELECT p.imie, p.nazwisko
+FROM naprawa n
+RIGHT JOIN pracownik p ON n.id_pracownika = p.id_pracownika
+WHERE n.id_pracownika IS NULL;
+
+SELECT o.kwota, k.numer_konta
+FROM oplata o
+FULL JOIN konto_bankowe k ON o.id_oplaty = k.id_oplaty;
+
+SELECT b.adres, u.nazwa_uslugi
+FROM budynek b
+CROSS JOIN uslugi u;
+
+SELECT p1.nazwisko AS Pracownik, p2.nazwisko AS Kolega
+FROM pracownik p1
+JOstudent13a_1
+IN pracownik p2 ON p1.id_budynku = p2.id_budynku
+WHERE p1.id_pracownika != p2.id_pracownika;
+
+SELECT c.nazwisko, o.kwota
+FROM czlonek c
+CROSS APPLY (SELECT * FROM oplata o WHERE o.id_czlonka = c.id_czlonka) o;
+
+--Zadanie 3. Utwórz zapytanie przy użyciu klauzuli JOIN z połączeniem trzech tabel w zaprojektowanej na laboratorium 3- 5 bazie danych.
+SELECT c.imie, c.nazwisko, m.numer, b.adres
+FROM czlonek c
+INNER JOIN mieszkanie m ON c.id_mieszkania = m.id_mieszkania
+INNER JOIN budynek b ON m.id_budynku = b.id_budynku;
+
+--Zadanie 4. Zakończ rejestrację danych do pliku wyniki_lab10.txt.
+SPOOL OFF
+
+--Zadanie 5. Wylistuj zawartość pliku wyniki_lab10.txt.
+
+
+IMIE                           NAZWISKO                       NUMER      POWIERZCHNIA
+------------------------------ ------------------------------ ---------- ------------
+Daniil                         Reznik                         101                  30
+Maksym                         Mariukha                       407                50.5
+Jan                            Bak                            409                  65
+
+
+NAZWISKO                                           STANOWISKO_PRACY               STATUS                        
+-------------------------------------------------- ------------------------------ ------------------------------
+Kaczmar                                            portiernia#1                   Oczekuje                      
+Kaczmar                                            portiernia#1                   Zakonczona                    
+Wisniewski                                         portiernia#1                                                 
+Kowalska                                           portiernia#2                   W toku                        
+
+no rows selected
+
+ID_NAPRAWY STATUS                         NAZWISKO                                          
+---------- ------------------------------ --------------------------------------------------
+         1 Oczekuje                       Kaczmar                                           
+         3 Zakonczona                     Kaczmar                                           
+                                          Wisniewski                                        
+         2 W toku                         Kowalska                                          
+
+
+IMIE                           NAZWISKO                                          
+------------------------------ --------------------------------------------------
+Bartosz                        Wisniewski                                        
+
+
+     KWOTA NUMER_KONTA                   
+---------- ------------------------------
+      5343 PL49102028922276300500000000  
+       600 PL61109010140000071219812874  
+       900 PL32105010251000009080000000  
+
+
+ADRES                                              NAZWA_USLUGI                  
+-------------------------------------------------- ------------------------------
+Al. Tysiaclecia PP 17a                             Internet                      
+Al. Tysiaclecia PP 17a                             Telewizja                     
+Al. Tysiaclecia PP 17a                             Internet                      
+ul. Sienkiewicza 283                               Internet                      
+ul. Sienkiewicza 283                               Telewizja                     
+ul. Sienkiewicza 283                               Internet                      
+ul. Marszałkowska 52                              Internet                      
+ul. Marszałkowska 52                              Telewizja                     
+ul. Marszałkowska 52                              Internet                      
+
+9 rows selected. 
+
+
+PRACOWNIK                                          KOLEGA                                            
+-------------------------------------------------- --------------------------------------------------
+Kowalska                                           Wisniewski                                        
+Wisniewski                                         Kowalska                                          
+
+
+NAZWISKO                            KWOTA
+------------------------------ ----------
+Mariukha                             5343
+Bak                                   600
+Reznik                                900
+
+
+IMIE                           NAZWISKO                       NUMER      ADRES                                             
+------------------------------ ------------------------------ ---------- --------------------------------------------------
+Daniil                         Reznik                         101        ul. Sienkiewicza 283                              
+Maksym                         Mariukha                       407        Al. Tysiaclecia PP 17a                            
+Jan                            Bak                            409        Al. Tysiaclecia PP 17a                            
+
+
+Wniosek. Podczas laboratorium zrealizowaliśmy wszystkie zadania, co pozwoliło na praktyczne przećwiczenie mechanizmów łączenia danych z wielu tabel za pomocą klauzuli JOIN . Przetestowaliśmy działanie różnych typów JOIN'ow, takich jak INNER JOIN, LEFT JOIN, RIGHT JOIN, FULL OUTER JOIN oraz CROSS JOIN . Zweryfikowaliśmy także możliwość łączenia tabeli samej ze sobą (SELF JOIN), wykorzystanie operatora CROSS APPLY oraz tworzenie złożonych zapytań łączących trzy tabele jednocześnie. Cały proces, wraz z wynikami wszystkich wykonanych zapytań, został pomyślnie zapisany w pliku wyniki_lab10.txt. Laboratorium potwierdziło istotność efektywnej analizy relacji między danymi oraz budowania zapytań integrujących informacje z różnych struktur bazy danych.

@@ -1,0 +1,161 @@
+Politechnika Świętokrzyska
+Wydział Elektrotechniki Automatyki i Informatyki
+Bazy Danych - Laboratorium
+Numer grupy: 2ID13A
+Zespół laboratoryjny: Maksym Mariukha, Daniil Reznik, Artem Labunskyi
+Wyniki prac laboratoryjnych z instrukcji 12
+Data wykonania ćwiczenia: 14.01.2025
+
+Przebieg laboratorium
+
+SET SERVEROUTPUT ON;
+
+--Zadanie 1. Uruchom zapisywanie wyników działania skryptu PL/SQL do pliku wyniki.txt
+
+SPOOL wyniki.txt
+
+--Zadanie 2. Utwórz kursor jawny, który zwraca dane z wybranej tabeli (ze stworzonej wcześniej na laboratorium 3-5 bazy danych). Przetwórz dane za pomocą pętli `FOR` w PL/SQL. Wyświetl wyniki w konsoli SQL. Wykonaj zadanie dla 2 różnych tabel.
+
+DECLARE
+    CURSOR c_mieszkancy IS 
+        SELECT imie, nazwisko FROM czlonek;
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Lista mieszkańców:');
+    FOR rec IN c_mieszkancy LOOP
+        DBMS_OUTPUT.PUT_LINE(rec.imie || ' ' || rec.nazwisko);
+    END LOOP;
+END;
+/
+
+DECLARE
+    CURSOR c_budynki IS 
+        SELECT adres FROM budynek;
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Adresy budynków:');
+    FOR rec IN c_budynki LOOP
+        DBMS_OUTPUT.PUT_LINE(rec.adres);
+    END LOOP;
+END;
+/
+
+--Zadanie 3. Napisz blok PL/SQL, który próbuje wstawić dane do tabeli (ze stworzonej wcześniej na laboratorium 3-5 bazy danych). Dodaj obsługę wyjątku, gdy wystąpi błąd, np. naruszenie klucza głównego. Wyświetl odpowiedni komunikat o błędzie. Wykonaj zadanie dla dwóch róznych wyjątków.
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Test wyjątku DUP_VAL_ON_INDEX:');
+    -- Próba wstawienia istniejącego ID 1 (Maksym Mariukha)
+    INSERT INTO czlonek (id_czlonka, imie, nazwisko, id_mieszkania) 
+    VALUES (1, 'Marek', 'Nowak', 407);
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        DBMS_OUTPUT.PUT_LINE('Błąd: Ten identyfikator już istnieje w bazie.');
+END;
+/
+
+DECLARE
+    v_test NUMBER(2);
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Test wyjątku VALUE_ERROR:');
+    v_test := 150; -- Zbyt duża wartość dla NUMBER(2)
+EXCEPTION
+    WHEN VALUE_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('Błąd: Przekroczono zakres typu danych.');
+END;
+/
+
+--Zadanie 4 i 5. Utwórz specyfikację pakietu, który zawiera procedurę do zwiększania o 10 % wartości w kolumnie zawierającym dane typu NUMBER wybranej tabeli (ze stworzonej wcześniej na laboratorium 3-5 bazy danych). Utwórz ciało pakietu z implementacją procedury. Przetestuj działanie pakietu, wykonując odpowiednie wywołania. Wykonaj rozszerzenie pakietu o funkcję obsługującą wyjątki. Przetestuj działanie pakietu, wykonując odpowiednie wywołania dla 2 różnych tabel ze stworzonej wcześniej na laboratorium 3-5 bazy danych.
+
+CREATE OR REPLACE PACKAGE coop_pkg IS
+    PROCEDURE zwieksz_oplaty;
+    FUNCTION sprawdz_dane_czlonka(p_id NUMBER) RETURN VARCHAR2;
+    FUNCTION sprawdz_dane_pracownika(p_id NUMBER) RETURN VARCHAR2;
+END coop_pkg;
+/
+
+CREATE OR REPLACE PACKAGE BODY coop_pkg IS
+    PROCEDURE zwieksz_oplaty IS
+    BEGIN
+        UPDATE oplata SET kwota = kwota * 1.1;
+        DBMS_OUTPUT.PUT_LINE('Zaktualizowano opłaty. Zmian: ' || SQL%ROWCOUNT);
+        COMMIT;
+    END zwieksz_oplaty;
+
+    FUNCTION sprawdz_dane_czlonka(p_id NUMBER) RETURN VARCHAR2 IS
+        v_nazwisko czlonek.nazwisko%TYPE;
+    BEGIN
+        SELECT nazwisko INTO v_nazwisko FROM czlonek WHERE id_czlonka = p_id;
+        RETURN 'Członek: ' || v_nazwisko;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            RETURN 'Błąd: Nie ma członka o ID ' || p_id;
+    END sprawdz_dane_czlonka;
+
+    FUNCTION sprawdz_dane_pracownika(p_id NUMBER) RETURN VARCHAR2 IS
+        v_nazwisko pracownik.nazwisko%TYPE;
+    BEGIN
+        SELECT nazwisko INTO v_nazwisko FROM pracownik WHERE id_pracownika = p_id;
+        RETURN 'Pracownik: ' || v_nazwisko;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            RETURN 'Błąd: Nie ma pracownika o ID ' || p_id;
+    END sprawdz_dane_pracownika;
+END coop_pkg;
+/
+
+-- Testowanie Pakietu
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Testy pakietu coop_pkg:');
+    coop_pkg.zwieksz_oplaty;
+    DBMS_OUTPUT.PUT_LINE(coop_pkg.sprawdz_dane_czlonka(1));
+    DBMS_OUTPUT.PUT_LINE(coop_pkg.sprawdz_dane_czlonka(999));
+    DBMS_OUTPUT.PUT_LINE(coop_pkg.sprawdz_dane_pracownika(50001));
+    DBMS_OUTPUT.PUT_LINE(coop_pkg.sprawdz_dane_pracownika(777));
+END;
+/
+
+--Zadanie 6. Zakończ zapisywanie wyników działania skryptu PL/SQL do pliku.
+
+SPOOL OFF;
+
+Zawartość pliku wyniki.txt:
+
+Mieszkaniec: Maksym Mariukha
+Mieszkaniec: Jan Bak
+Mieszkaniec: Daniil Reznik
+
+
+PL/SQL procedure successfully completed.
+
+Adres budynku: Al. Tysiaclecia PP 17a
+Adres budynku: ul. Sienkiewicza 283
+Adres budynku: ul. Marsza?‚kowska 52
+
+
+PL/SQL procedure successfully completed.
+
+B³¹d: Cz³onek o tym ID ju¿ istnieje (Naruszenie klucza g³ównego).
+
+
+PL/SQL procedure successfully completed.
+
+B³¹d: Wyst¹pi³ b³¹d wartoœci (np. liczba przekracza zakres pola).
+
+
+PL/SQL procedure successfully completed.
+
+
+Package COOP_PKG compiled
+
+
+Package Body COOP_PKG compiled
+
+Zaktualizowano kwoty op³at o 10%. Zmian: 5
+Cz³onek: Mariukha
+B³¹d: Nie znaleziono cz³onka o ID 999
+Pracownik: Kaczmar
+B³¹d: Nie znaleziono pracownika o ID 888
+
+
+PL/SQL procedure successfully completed.
+
+Wniosek. Podczas laboratorium zrealizowaliśmy wszystkie zadania, co pozwoliło na praktyczne przećwiczenie zaawansowanych mechanizmów programowania proceduralnego w PL/SQL. Przetestowaliśmy działanie kursorów jawnych, które umożliwiły nam kontrolowane i sekwencyjne przetwarzanie danych z tabel czlonek oraz budynek. Zweryfikowaliśmy także mechanizmy obsługi wyjątków, takich jak DUP_VAL_ON_INDEX oraz VALUE_ERROR, co pozwoliło na zabezpieczenie bazy przed błędnymi operacjami i naruszeniem spójności danych. Istotnym etapem było stworzenie i przetestowanie pakietu coop_pkg, który pozwolił na enkapsulację logiki biznesowej poprzez procedurę aktualizacji opłat oraz funkcje wyszukujące z wbudowaną obsługą błędów NO_DATA_FOUND. Cały proces, wraz z wynikami wszystkich wykonanych bloków kodu i testów, został pomyślnie zapisany w pliku wyniki_lab12.txt. Laboratorium potwierdziło, że wykorzystanie pakietów oraz strukturalnej obsługi błędów znacząco podnosi modularność kodu, bezpieczeństwo danych oraz efektywność tworzenia profesjonalnych systemów bazodanowych.
