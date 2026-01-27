@@ -1,0 +1,457 @@
+# SYSTEM ZARZADZANIA SPOLDZIELNIA MIESZKANIOWA
+## Raport Projektu - Bazy Danych 2
+
+Autor: Maksym Mariukha
+Grupa: 2ID13A
+Data: Styczen 2026
+
+================================================================================
+
+## 1. OPIS TEMATYKI PROJEKTU
+
+### 1.1. Cel projektu
+
+Projekt stanowi kompleksowy system informatyczny do zarzadzania spoldzielnia mieszkaniowa. System zostal zaprojektowany i zaimplementowany jako aplikacja webowa z wykorzystaniem bazy danych Oracle Database 21c XE.
+
+Glowne funkcjonalnosci systemu obejmuja:
+
+- Zarzadzanie budynkami i mieszkaniami - pelna ewidencja nieruchomosci nalezacych do spoldzielni
+- Obsluga czlonkow spoldzielni - rejestracja, aktualizacja danych osobowych, historia czlonkostwa
+- Rozliczanie oplat - naliczanie oplat za uslugi komunalne, monitoring platnosci, raportowanie zaleglosci
+- Zarzadzanie naprawami - zgloszenia awarii, przydzielanie pracownikow, sledzenie statusu
+- System raportowania - statystyki, analizy, zestawienia zbiorcze
+
+### 1.2. Zakres funkcjonalny
+
+System sklada sie z dwoch glownych modulow:
+
+Panel Administratora - umozliwia pelne zarzadzanie danymi spoldzielni, generowanie raportow, korzystanie z zaawansowanych narzedzi administracyjnych.
+
+Portal Mieszkanca - dedykowany dla czlonkow spoldzielni, umozliwia podglad oplat, zglaszanie napraw, przegladanie harmonogramu spotkan.
+
+### 1.3. Technologie
+
+Baza danych: Oracle Database 21c XE
+Backend: Python 3.11 z frameworkiem FastAPI
+Frontend: React 18 z TypeScript i Vite
+Konteneryzacja: Docker i Docker Compose
+
+================================================================================
+
+## 2. ARCHITEKTURA SYSTEMU
+
+### 2.1. Warstwy aplikacji
+
+System zostal zaprojektowany w architekturze trojwarstwowej:
+
+Warstwa prezentacji (Frontend) - aplikacja React uruchamiana na porcie 5173, odpowiedzialna za interfejs uzytkownika.
+
+Warstwa logiki biznesowej (Backend) - serwer FastAPI na porcie 8000, obslugujacy API REST i komunikacje z baza danych.
+
+Warstwa danych (Baza danych) - Oracle Database na porcie 1521, przechowujaca wszystkie dane systemu oraz logike proceduralna.
+
+### 2.2. Struktura bazy danych
+
+Baza danych zawiera nastepujace obiekty:
+
+Tabele (12): budynek, mieszkanie, czlonek, pracownik, uslugi, naprawa, oplata, umowa, spotkanie_mieszkancow, konto_spoldzielni, log_zmian_czlonka, uzytkownicy
+
+Widoki (10): v_mieszkania_info, v_oplaty_summary, v_naprawy_status, v_moje_oplaty, v_czlonek_bezpieczny, v_pracownicy_naprawy, v_oplaty_uslugi_full, v_budynki_uslugi_cross, v_pracownicy_koledzy, v_czlonkowie_pelne_info
+
+Widoki zmaterializowane (2): mv_dashboard_stats, mv_zuzycie_mediow
+
+Procedury (5): dodaj_czlonka, aktualizuj_czlonka, usun_czlonka, zwieksz_oplaty, zglos_naprawe
+
+Funkcje (5): pobierz_czlonkow_budynku, dodaj_spotkanie, dodaj_oplate_fn, aktualizuj_saldo_konta, policz_rekordy
+
+Pakiety (2): coop_pkg, coop_crud_pkg
+
+Triggery (2): trg_audit_czlonek, trg_walidacja_oplaty
+
+Sekwencje (2): spotkanie_seq, naprawa_seq
+
+================================================================================
+
+## 3. KLUCZOWE MOZLIWOSCI
+
+### 3.1. Panel Administratora
+
+Pulpit Glowny - wyswietla karty ze statystykami (liczba budynkow, mieszkan, czlonkow, pracownikow), wykres oplat, liste ostatnich zdarzen. Wykorzystuje widok zmaterializowany mv_dashboard_stats dla optymalnej wydajnosci.
+
+Zarzadzanie tabelami - pelne operacje CRUD (Create, Read, Update, Delete) na wszystkich tabelach systemu. Formularze z walidacja pol, automatyczne pobieranie powiazanych danych z list rozwijanych.
+
+Wyszukiwanie - filtrowanie danych przez baze danych z uzyciem operatora WHERE LIKE. Debounce 400ms zapobiega nadmiernym zapytaniom podczas pisania.
+
+Raporty - dostep do wszystkich widokow bazy danych, prezentacja danych z roznymi typami JOIN, agregacje i podsumowania.
+
+Narzedzia Administratora - wywolywanie procedur i funkcji skladowanych, przegladanie logow audytu, statystyki tabel.
+
+### 3.2. Portal Mieszkanca
+
+Moje Oplaty - lista oplat mieszkanca pobierana z widoku v_moje_oplaty, z informacja o nazwie uslugi, kwocie, zuzyciu i statusie platnosci.
+
+Moje Naprawy - historia zgloszen napraw z informacja o statusie i przydzielonym pracowniku.
+
+Zglos Naprawe - formularz zgloszenia nowej naprawy, wywolujacy procedure zglos_naprawe.
+
+Nadchodzace Spotkania - lista spotkan mieszkancow z data wieksza niz biezaca.
+
+Zuzycie Mediow - podsumowanie zuzycia uslug z agregacja GROUP BY.
+
+### 3.3. Bezpieczenstwo
+
+Logowanie administratora - weryfikacja danych z tabeli uzytkownicy.
+
+Logowanie mieszkanca - weryfikacja adresu email i numeru mieszkania z JOIN trzech tabel.
+
+Widok INVISIBLE - v_czlonek_bezpieczny ukrywa kolumny PESEL i telefon przy SELECT *, chroniąc wrazliwe dane.
+
+Trigger audytu - trg_audit_czlonek automatycznie loguje wszystkie operacje INSERT, UPDATE, DELETE na tabeli czlonek.
+
+================================================================================
+
+## 4. KOMPILACJA I URUCHOMIENIE
+
+### 4.1. Wymagania systemowe
+
+Docker w wersji 20.10 lub nowszej
+Docker Compose w wersji 2.0 lub nowszej
+Wolne porty: 1521, 8000, 5173
+Minimum 4 GB pamieci RAM
+Minimum 10 GB wolnego miejsca na dysku
+
+### 4.2. Uruchomienie z Docker Compose
+
+Krok 1: Sklonuj repozytorium
+git clone https://github.com/mariukha/CoopManager.git
+cd CoopManager
+
+Krok 2: Uruchom wszystkie kontenery
+docker-compose up -d
+
+Krok 3: Sprawdz status kontenerow
+docker-compose ps
+
+Krok 4: Poczekaj na inicjalizacje bazy danych (okolo 2-3 minuty)
+docker-compose logs -f oracle-db
+
+### 4.3. Dostep do aplikacji
+
+Frontend: http://localhost:5173
+Backend API: http://localhost:8000
+Administrator: login "admin", haslo "admin123"
+Mieszkaniec: email "jan.kowalski@email.pl", numer mieszkania "1A"
+
+### 4.4. Uruchomienie lokalne (bez Docker)
+
+Backend:
+cd backend
+pip install -r requirements.txt
+python main.py
+
+Frontend (w nowym oknie terminala):
+cd frontend
+npm install
+npm run dev
+
+================================================================================
+
+## 5. INSTRUKCJA OBSLUGI
+
+### 5.1. Instrukcja obslugi dla Administratora
+
+• Logowanie: Aby uzyskac dostep do funkcji zarzadczych, na ekranie powitalnym nalezy wybrac modul Administrator i podac dane uwierzytelniajace (login: admin, haslo: admin123).
+
+• Nawigacja: Po zalogowaniu system wyswietla pulpit ze statystykami zbiorczymi. Korzystajac z menu bocznego, uzytkownik moze przejsc do zarzadzania konkretnymi obszarami: Budynki, Mieszkania, Czlonkowie, Pracownicy, Uslugi, Oplaty, Naprawy, Umowy, Spotkania, Konta.
+
+• Wykonywanie operacji CRUD: W kazdej sekcji widoczna jest tabela z danymi oraz przyciski akcji: "Dodaj rekord" - otwiera formularz dodawania nowego rekordu. Ikona olowka - edycja istniejacego rekordu. Ikona kosza - usuniecie rekordu. Pole "Szukaj..." - wyszukiwanie przez baze danych (WHERE LIKE). Walidacja danych: Zmiany sa natychmiastowo walidowane przez triggery w bazie danych (np. trg_walidacja_oplaty blokuje ujemne kwoty oplat).
+
+• Narzedzia Administratora: W zakladce "Narzedzia administratora" dostepne sa: Zwieksz ceny uslug - wywoluje procedure zwieksz_oplaty. Dodaj oplate - wywoluje funkcje dodaj_oplate_fn z automatycznym obliczeniem kwoty. Historia zmian - wyswietla logi audytu z triggera trg_audit_czlonek. Statystyki tabel - wywoluje funkcje policz_rekordy (EXECUTE IMMEDIATE).
+
+• Generowanie raportow: W zakladce "Raporty" administrator moze przegladac zestawienia oparte na widokach SQL: Mieszkania z adresami (v_mieszkania_info), Podsumowanie oplat per mieszkanie (v_oplaty_summary), Status napraw (v_naprawy_status), Widoki z roznymi typami JOIN (RIGHT, FULL OUTER, CROSS, SELF).
+
+• Zakladka Podsumowanie: Wyswietla karty ze statystykami zbiorczymi, wykres oplat, podsumowanie zuzycia mediow z widoku zmaterializowanego mv_zuzycie_mediow oraz liste ostatnich zdarzen.
+
+---
+
+### 5.2. Panel Administratora - Szczegoly
+
+#### Logowanie
+
+Aby uzyskac dostep do funkcji zarzadczych, na ekranie powitalnym nalezy wybrac modul "Administrator" i podac dane uwierzytelniajace:
+- Login: admin
+- Haslo: admin123
+
+[SCREENSHOT 1: Ekran logowania z wyborem roli Administrator/Mieszkaniec]
+
+#### Nawigacja
+
+Po zalogowaniu system wyswietla pulpit ze statystykami zbiorczymi. Korzystajac z menu bocznego, uzytkownik moze przejsc do zarzadzania konkretnymi obszarami:
+- Budynki
+- Mieszkania
+- Czlonkowie
+- Pracownicy
+- Uslugi
+- Oplaty
+- Naprawy
+- Umowy
+- Spotkania
+- Konta
+
+[SCREENSHOT 2: Pulpit glowny administratora z kartami statystyk]
+
+#### Wykonywanie operacji CRUD
+
+W kazdej sekcji widoczna jest tabela z danymi oraz przyciski akcji:
+- "Dodaj rekord" - otwiera formularz dodawania nowego rekordu
+- Ikona olowka - edycja istniejacego rekordu
+- Ikona kosza - usuniecie rekordu
+- Pole "Szukaj..." - wyszukiwanie przez baze danych (WHERE LIKE)
+
+Walidacja danych: Zmiany sa natychmiastowo walidowane przez triggery w bazie danych (np. trg_walidacja_oplaty blokuje ujemne kwoty oplat).
+
+[SCREENSHOT 3: Lista budynkow z otwartym formularzem dodawania]
+
+#### Narzedzia Administratora
+
+W zakladce "Narzedzia administratora" dostepne sa:
+- Zwieksz ceny uslug - wywoluje procedure zwieksz_oplaty z podanym procentem
+- Dodaj oplate - wywoluje funkcje dodaj_oplate_fn z automatycznym obliczeniem kwoty na podstawie cennika i zuzycia
+- Historia zmian - wyswietla logi audytu z triggera trg_audit_czlonek (tabela log_zmian_czlonka)
+- Statystyki tabel - wywoluje funkcje policz_rekordy (EXECUTE IMMEDIATE) dla kazdej tabeli w bazie danych
+
+[SCREENSHOT 5: Narzedzia administratora z formularzami wywolywania procedur]
+
+#### Generowanie raportow
+
+W zakladce "Raporty" administrator moze przegladac zestawienia oparte na widokach SQL:
+- Mieszkania z adresami (v_mieszkania_info) - widok z INNER JOIN
+- Podsumowanie oplat per mieszkanie (v_oplaty_summary) - widok z GROUP BY i funkcjami agregujacymi
+- Status napraw (v_naprawy_status) - widok z CASE WHEN
+- Widoki z roznymi typami JOIN:
+  - RIGHT JOIN: v_pracownicy_naprawy - wszyscy pracownicy, nawet bez przypisanych napraw
+  - FULL OUTER JOIN: v_oplaty_uslugi_full - wszystkie rekordy z obu tabel
+  - CROSS JOIN: v_budynki_uslugi_cross - iloczyn kartezjanski budynkow i uslug
+  - SELF JOIN: v_pracownicy_koledzy - pary pracownikow na tym samym stanowisku
+
+[SCREENSHOT 4: Strona raportow z lista dostepnych widokow]
+
+#### Zakladka Podsumowanie
+
+W zakladce "Podsumowanie" wyswietlane sa:
+- Karty ze statystykami zbiorczymi (liczba budynkow, mieszkan, czlonkow, pracownikow)
+- Wykres oplat pokazujacy rozklad platnosci w czasie
+- Podsumowanie zuzycia mediow z widoku zmaterializowanego mv_zuzycie_mediow
+- Lista ostatnich zdarzen i zmian w systemie
+
+Dane statystyczne sa pobierane z widoku zmaterializowanego mv_dashboard_stats, co zapewnia szybkie ladowanie pulpitu.
+
+### 5.2. Portal Mieszkanca
+
+1. Na ekranie logowania wybierz zakladke "Mieszkaniec"
+2. Wpisz email (np. jan.kowalski@email.pl) i numer mieszkania (np. 1A)
+3. Po zalogowaniu wyswietlany jest pulpit mieszkanca z zakladkami:
+   - Moje oplaty - lista oplat z widoku v_moje_oplaty
+   - Moje naprawy - historia zgloszen napraw
+   - Spotkania - nadchodzace spotkania mieszkancow
+   - Zglos naprawe - formularz wywolujacy procedure zglos_naprawe
+
+[SCREENSHOT 6: Portal mieszkanca z lista oplat]
+
+================================================================================
+
+## 6. ELEMENTY LABORATORIOW LAB 7-13
+
+### 6.1. LAB 7: CREATE TABLE, PRIMARY KEY, FOREIGN KEY, INSERT, UPDATE, DELETE
+
+W ramach LAB 7 zaimplementowano 12 tabel z odpowiednimi kluczami glownymi i obcymi:
+
+Tabela BUDYNEK - przechowuje dane budynkow spoldzielni. Klucz glowny: id_budynku.
+
+Tabela MIESZKANIE - przechowuje dane mieszkan. Klucz glowny: id_mieszkania. Klucz obcy: id_budynku odnosi sie do tabeli budynek z ON DELETE CASCADE.
+
+Tabela CZLONEK - przechowuje dane czlonkow spoldzielni. Klucz glowny: id_czlonka. Klucz obcy: id_mieszkania odnosi sie do tabeli mieszkanie. Kolumna data_przystapienia ma wartosc domyslna SYSDATE.
+
+Tabela PRACOWNIK - przechowuje dane pracownikow. Klucz glowny: id_pracownika.
+
+Tabela USLUGI - przechowuje cennik uslug komunalnych. Klucz glowny: id_uslugi.
+
+Tabela NAPRAWA - przechowuje zgloszenia napraw. Klucz glowny: id_naprawy. Klucze obce: id_mieszkania, id_pracownika.
+
+Tabela OPLATA - przechowuje naliczone oplaty. Klucz glowny: id_oplaty. Klucze obce: id_mieszkania, id_uslugi.
+
+Tabela UMOWA - przechowuje umowy najmu i wlasnosci. Klucz glowny: id_umowy. Klucze obce: id_mieszkania, id_czlonka.
+
+Tabela SPOTKANIE_MIESZKANCOW - przechowuje harmonogram spotkan. Klucz glowny: id_spotkania.
+
+Tabela KONTO_SPOLDZIELNI - przechowuje konta bankowe. Klucz glowny: id_konta. Klucz obcy: id_uslugi.
+
+Tabela LOG_ZMIAN_CZLONKA - przechowuje logi audytu. Klucz glowny: id_logu.
+
+Tabela UZYTKOWNICY - przechowuje dane logowania administratorow. Klucz glowny: id.
+
+ALTER TABLE ADD zostal uzyty do dodania kolumn:
+- naprawa.uwagi (VARCHAR2(500))
+- naprawa.priorytet (VARCHAR2(20) DEFAULT 'sredni')
+- budynek.typ_budynku (VARCHAR2(50) DEFAULT 'blok')
+
+Operacje CRUD sa dostepne przez REST API:
+- SELECT: GET /data/{table}
+- INSERT: POST /data/{table}
+- UPDATE: PUT /data/{table}/{id_field}/{id_value}
+- DELETE: DELETE /data/{table}/{id_field}/{id_value}
+
+### 6.2. LAB 8: SELECT z WHERE, ORDER BY, GROUP BY, AVG, SUM, COUNT, CASE
+
+SELECT z WHERE LIKE - zaimplementowano wyszukiwanie tekstowe przez baze danych. Endpoint GET /data/{table}/search?q= dynamicznie buduje zapytanie z klauzula WHERE LIKE dla wszystkich kolumn tekstowych tabeli.
+
+Przyklad wygenerowanego SQL:
+SELECT * FROM czlonek 
+WHERE UPPER(IMIE) LIKE UPPER('%Kowalski%') 
+   OR UPPER(NAZWISKO) LIKE UPPER('%Kowalski%')
+   OR UPPER(EMAIL) LIKE UPPER('%Kowalski%')
+
+GROUP BY z funkcjami agregujacymi - wykorzystane w raporcie zbiorczym:
+SELECT u.nazwa_uslugi, NVL(SUM(o.zuzycie), 0) as total_zuzycie, NVL(SUM(o.kwota), 0) as total_kwota
+FROM uslugi u LEFT JOIN oplata o ON u.id_uslugi = o.id_uslugi
+GROUP BY u.id_uslugi, u.nazwa_uslugi
+ORDER BY total_kwota DESC
+
+COUNT - zliczanie rekordow:
+SELECT COUNT(*) FROM czlonek
+SELECT COUNT(*) FROM oplata WHERE status_oplaty = 'nieoplacone'
+
+SUM - sumowanie kwot:
+SELECT NVL(SUM(kwota), 0) FROM oplata
+
+### 6.3. LAB 9: VIEW, MATERIALIZED VIEW, INVISIBLE columns
+
+Widok prosty V_MIESZKANIA_INFO - laczy tabele mieszkanie i budynek, wyswietlajac mieszkania z adresem budynku.
+
+Widok zlozony V_OPLATY_SUMMARY - wykorzystuje GROUP BY, SUM, COUNT i CASE do podsumowania oplat per mieszkanie, obliczajac liczbe oplat, sume kwot i zaleglosci.
+
+Widok V_NAPRAWY_STATUS - wykorzystuje CASE do transformacji statusu naprawy na czytelny opis (np. 'zgloszona' -> 'Oczekuje na realizacje').
+
+Widok V_MOJE_OPLATY - widok dla portalu mieszkanca, laczacy tabele oplata i uslugi.
+
+Widok zmaterializowany MV_DASHBOARD_STATS - keszuje statystyki dla pulpitu glownego (liczby rekordow w tabelach, sumy oplat). Zdefiniowany z opcjami BUILD IMMEDIATE i REFRESH FORCE ON DEMAND.
+
+Widok zmaterializowany MV_ZUZYCIE_MEDIOW - agreguje zuzycie mediow per budynek i usluga.
+
+Widok z kolumnami INVISIBLE V_CZLONEK_BEZPIECZNY - definiuje kolumny pesel i telefon jako INVISIBLE. Przy wykonaniu SELECT * te kolumny nie sa zwracane, co chroni wrazliwe dane. Aby je pobrac, trzeba jawnie podac ich nazwy w zapytaniu.
+
+### 6.4. LAB 10: Rozne typy JOIN
+
+RIGHT JOIN - widok V_PRACOWNICY_NAPRAWY laczy tabele naprawa i pracownik uzywajac RIGHT JOIN, dzieki czemu wyswietlani sa wszyscy pracownicy, nawet ci bez przypisanych napraw.
+
+FULL OUTER JOIN - widok V_OPLATY_USLUGI_FULL laczy tabele oplata i uslugi uzywajac FULL OUTER JOIN, dzieki czemu wyswietlane sa wszystkie rekordy z obu tabel, nawet te bez powiazania.
+
+CROSS JOIN - widok V_BUDYNKI_USLUGI_CROSS tworzy iloczyn kartezjanski tabel budynek i uslugi, generujac wszystkie mozliwe kombinacje budynkow i uslug.
+
+SELF JOIN - widok V_PRACOWNICY_KOLEDZY laczy tabele pracownik sama ze soba po kolumnie stanowisko, tworzac pary pracownikow na tym samym stanowisku.
+
+JOIN 3 tabel - widok V_CZLONKOWIE_PELNE_INFO laczy tabele czlonek, mieszkanie i budynek uzywajac INNER JOIN, wyswietlajac pelne informacje o czlonkach wraz z adresem.
+
+### 6.5. LAB 11: PROCEDURE, FUNCTION, SEQUENCE, CURSOR
+
+SEQUENCE - zdefiniowano sekwencje spotkanie_seq i naprawa_seq z poczatkowa wartoscia 1000 i inkrementem 1.
+
+Procedura DODAJ_CZLONKA - procedura INSERT z parametrami wejsciowymi i wyjsciowym (id nowego rekordu). Obsluguje wyjatki DUP_VAL_ON_INDEX i OTHERS.
+
+Procedura AKTUALIZUJ_CZLONKA - procedura UPDATE wykorzystujaca funkcje NVL do aktualizacji tylko podanych wartosci. Zwraca liczbe zaktualizowanych wierszy. Rzuca wyjatek gdy nie znaleziono rekordu.
+
+Procedura USUN_CZLONKA - procedura DELETE zwracajaca liczbe usunietych wierszy. Rzuca wyjatek gdy nie znaleziono rekordu.
+
+Procedura ZWIEKSZ_OPLATY - procedura zwiekszajaca ceny uslug o podany procent (domyslnie 10%).
+
+Procedura ZGLOS_NAPRAWE - procedura zglaszania naprawy przez mieszkanca, zwracajaca id nowego zgloszenia.
+
+Funkcja POBIERZ_CZLONKOW_BUDYNKU - funkcja z CURSOR iterujacym po czlonkach danego budynku, zwracajaca ich imiona i nazwiska jako tekst.
+
+Funkcja DODAJ_SPOTKANIE - funkcja dodajaca spotkanie i zwracajaca jego id.
+
+Funkcja DODAJ_OPLATE_FN - funkcja automatycznie obliczajaca kwote oplaty na podstawie cennika i zuzycia.
+
+Funkcja AKTUALIZUJ_SALDO_KONTA - funkcja aktualizujaca saldo konta spoldzielni.
+
+### 6.6. LAB 12: PACKAGE
+
+Pakiet COOP_PKG - pakiet zawierajacy operacje na oplatach i naprawach:
+- Procedura zwieksz_oplaty_pkg - zwiekszanie cen uslug
+- Funkcja policz_naprawy_pracownika - zliczanie napraw przypisanych do pracownika
+- Funkcja suma_oplat_mieszkania - sumowanie oplat dla mieszkania
+
+Pakiet COOP_CRUD_PKG - pakiet z operacjami CRUD i obsluga wyjatkow:
+- Procedura insert_budynek - dodawanie budynku z obsluga DUP_VAL_ON_INDEX
+- Procedura update_budynek - aktualizacja budynku z walidacja istnienia
+- Procedura delete_budynek - usuwanie budynku z obsluga bledow
+- Funkcja pobierz_nazwisko_czlonka - z obsluga NO_DATA_FOUND i TOO_MANY_ROWS
+- Funkcja pobierz_adres_budynku - z obsluga NO_DATA_FOUND
+- Funkcja statystyki_budynku - zwracajaca statystyki jako tekst
+
+### 6.7. LAB 13: TRIGGER, EXECUTE IMMEDIATE
+
+Trigger TRG_AUDIT_CZLONEK - trigger AFTER INSERT OR UPDATE OR DELETE na tabeli czlonek, automatycznie logujacy wszystkie operacje do tabeli log_zmian_czlonka. Przy INSERT zapisuje nowe dane, przy UPDATE zapisuje stare i nowe dane, przy DELETE zapisuje stare dane.
+
+Trigger TRG_WALIDACJA_OPLATY - trigger BEFORE INSERT OR UPDATE na kolumnie kwota tabeli oplata, blokujacy zapisanie ujemnych kwot. Rzuca wyjatek RAISE_APPLICATION_ERROR gdy kwota < 0.
+
+Funkcja POLICZ_REKORDY z EXECUTE IMMEDIATE - funkcja przyjmujaca nazwe tabeli jako parametr i dynamicznie budujaca zapytanie SQL do zliczenia rekordow. Wykorzystuje EXECUTE IMMEDIATE do wykonania dynamicznego SQL.
+
+[SCREENSHOT 7: Strona z logami audytu pokazujaca wyniki dzialania triggera]
+
+================================================================================
+
+## 7. PODSUMOWANIE I WNIOSKI
+
+### 7.1. Zrealizowane elementy
+
+W ramach projektu zrealizowano wszystkie wymagane elementy laboratoriow LAB 7-13:
+
+LAB 7: 12 tabel z kluczami glownymi i obcymi, operacje CRUD, ALTER TABLE ADD
+LAB 8: SELECT z WHERE LIKE, ORDER BY, GROUP BY, funkcje agregujace (SUM, COUNT, AVG), CASE
+LAB 9: 10 widokow prostych i zlozonych, 2 widoki zmaterializowane, widok z kolumnami INVISIBLE
+LAB 10: INNER JOIN, LEFT JOIN, RIGHT JOIN, FULL OUTER JOIN, CROSS JOIN, SELF JOIN, JOIN 3 tabel
+LAB 11: 2 sekwencje, 5 procedur z obsluga wyjatkow, 5 funkcji w tym z CURSOR
+LAB 12: 2 pakiety ze specyfikacja i implementacja
+LAB 13: 2 triggery (audyt i walidacja), funkcja z EXECUTE IMMEDIATE
+
+### 7.2. Wnioski
+
+Integracja bazy danych z aplikacja - wszystkie elementy laboratoriow zostaly zintegrowane z dzialajaca aplikacja webowa, co pozwala na praktyczne wykorzystanie poznanych technologii w realnym scenariuszu biznesowym.
+
+Architektura REST API - kazdy element bazy danych (widok, procedura, funkcja, pakiet) jest dostepny przez dedykowany endpoint REST API, co umozliwia latwa integracje z dowolnym frontendem i potencjalnie z innymi systemami.
+
+Bezpieczenstwo danych - zastosowano widoki z kolumnami INVISIBLE do ukrywania wrazliwych danych oraz trigger audytu do automatycznego sledzenia zmian, co spelnia podstawowe wymagania bezpieczenstwa.
+
+Optymalizacja wydajnosci - widoki zmaterializowane keszuja czesto uzywane dane statystyczne, co znaczaco przyspiesza ladowanie pulpitu glownego.
+
+Skalowalnosc - konteneryzacja z Docker umozliwia latwe wdrozenie i skalowanie systemu w srodowisku produkcyjnym.
+
+### 7.3. Mozliwosci rozwoju
+
+Potencjalne kierunki dalszego rozwoju systemu:
+- Integracja z systemem platnosci online
+- Aplikacja mobilna dla mieszkancow
+- System powiadomien email i SMS
+- Rozbudowa raportow o wykresy i eksport do PDF
+- Integracja z systemami smart home
+
+================================================================================
+
+## ZALACZNIKI
+
+### Lista wymaganych screenshotow
+
+1. Ekran logowania z wyborem roli Administrator/Mieszkaniec
+2. Pulpit glowny administratora z kartami statystyk
+3. Lista budynkow z otwartym formularzem dodawania
+4. Strona raportow z lista dostepnych widokow
+5. Narzedzia administratora z formularzami wywolywania procedur
+6. Portal mieszkanca z lista oplat
+7. Strona z logami audytu pokazujaca wyniki dzialania triggera
+
+================================================================================
+
+Repozytorium GitHub: https://github.com/mariukha/CoopManager
+
+Data utworzenia raportu: Styczen 2026

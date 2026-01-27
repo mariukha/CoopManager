@@ -11,7 +11,6 @@ import { LoginForm } from './components/LoginForm';
 import { Dashboard } from './pages/Dashboard';
 import { Procedures } from './pages/Procedures';
 import { Reports } from './pages/Reports';
-import { JoinViews } from './pages/JoinViews';
 import ResidentDashboard from './pages/ResidentDashboard';
 
 import { useAuth } from './hooks/useAuth';
@@ -101,7 +100,7 @@ const App: React.FC = () => {
 
   // LAB 8: SELECT z WHERE LIKE - wyszukiwanie przez baze danych
   const loadData = useCallback(async () => {
-    const specialViews = ['dashboard', 'system', 'reports', 'join-views'];
+    const specialViews = ['dashboard', 'system', 'reports'];
     if (specialViews.includes(currentView)) return;
     if (!userRole) return;
 
@@ -444,7 +443,7 @@ const App: React.FC = () => {
       if (currentView === 'dashboard') return <Dashboard />;
       if (currentView === 'system') return <Procedures />;
       if (currentView === 'reports') return <Reports />;
-      if (currentView === 'join-views') return <JoinViews />;
+
     }
 
     const columns = TABLE_COLUMNS[currentView] || [];
